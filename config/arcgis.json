@@ -1,0 +1,13 @@
+{
+	"map": {
+		"basemap": "gray-vector"
+	},
+	"mapView": {
+		"container": "viewDiv",
+		"center": [
+			100.5231,
+			13.7367
+		],
+		"zoom": 12
+	}
+}

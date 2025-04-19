@@ -1,0 +1,7 @@
+{
+	"purities": {
+		"Pure": 120,
+		"Normal": 60,
+		"Impure": 30
+	}
+}
