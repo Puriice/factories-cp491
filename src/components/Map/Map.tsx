@@ -1,5 +1,6 @@
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
+import esriConfig from "@arcgis/core/config";
 import { useEffect, useRef, useState } from "react";
 import style from "./scss/index.module.scss";
 import arcgisConfig from "../../../config/arcgis.json";
@@ -10,6 +11,9 @@ import gameConfig from "../../../config/game.json";
 import { ResourceNode } from "../../types/resources";
 
 function MapWindow() {
+    esriConfig.apiKey =
+        "AAPTxy8BH1VEsoebNVZXo8HurNZ-ICH9Ibiwmmwlxup4Wa-SGmG3n61UjtxoWG-0XYRb66sJ27N6PTnsN2fTMgerBaqh7TeZgMp3a_RneVXaZm8KY_xPXm3Vy0BU_cwmq8XLadrideqfSdHfsupgkKDG2Q87_1JY_lBrqItIyK8unkV-BFPnSRin5O0OvE6KbhGGHHQt70PfTYctDaOfKJQUGLVOlzOhcSuPhT3xFcvCwpCFRroupma1co4UQSbZrD5WAT1_qI5ZhzZb";
+
     const [, setMap] = useState<Map | null>(null);
     const [, setMapView] = useState<MapView | null>(null);
 
