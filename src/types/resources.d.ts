@@ -1,5 +1,7 @@
+export type ResourceName = "Iron" | "Copper" | "Coal" | "Wood"
+
 export interface ResourceNode {
-	name: string;
+	name: ResourceName;
 	purity: "Pure" | "Normal" | "Impure";
 	resource: string;
 	latitude: number;
