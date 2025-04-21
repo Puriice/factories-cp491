@@ -53,6 +53,9 @@ function MapWindow(props: MapWindowProps) {
 
         clearButtonRef.current?.addEventListener("click", () => {
             drawGraphicLayer.removeAll();
+            dispatch({
+                type: "default",
+            });
         });
 
         sketchViewModel.on("create", async (event) => {
