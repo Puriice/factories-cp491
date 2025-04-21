@@ -3,5 +3,6 @@
 		"Pure": 120,
 		"Normal": 60,
 		"Impure": 30
-	}
+	},
+	"inventorySize": 64
 }

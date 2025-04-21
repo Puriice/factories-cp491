@@ -1,4 +1,7 @@
 import CSVLayer from "@arcgis/core/layers/CSVLayer";
+import gameConfig from "../../config/game.json";
+import { ResourceName, ResourceNode } from "../types/resources";
+import ResourceNodeImg from "../assets/ResourceNodeImg";
 
 const res = await fetch("/nodes.csv");
 const nodes = await res.text();
@@ -30,7 +33,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Copper",
                 symbol: {
                     type: "picture-marker",
-                    url: "/resources/copper.png",
+                    url: ResourceNodeImg.Copper,
                     width: "60px",
                     height: "60px",
                 },
@@ -40,7 +43,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Iron",
                 symbol: {
                     type: "picture-marker",
-                    url: "/resources/iron.png",
+                    url: ResourceNodeImg.Iron,
                     width: "60px",
                     height: "60px",
                 },
@@ -50,7 +53,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Coal",
                 symbol: {
                     type: "picture-marker",
-                    url: "/resources/coal.png",
+                    url: ResourceNodeImg.Coal,
                     width: "60px",
                     height: "60px",
                 },
@@ -60,7 +63,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Wood",
                 symbol: {
                     type: "picture-marker",
-                    url: "/resources/wood.png",
+                    url: ResourceNodeImg.Wood,
                     width: "60px",
                     height: "60px",
                 },
@@ -69,4 +72,26 @@ const resourceNodesLayer = new CSVLayer({
     },
 });
 
+const resourceSummary = resourceNodesLayer
+    .queryFeatures()
+    .then((featuresSet) => {
+        return new Promise<Record<ResourceName, number>>((res) => {
+            const totalResource = featuresSet.features.reduce((prev, curr) => {
+                const { resource, purity } =
+                    curr.attributes as unknown as ResourceNode;
+
+                if (!Object.prototype.hasOwnProperty.call(prev, resource)) {
+                    prev[resource] = gameConfig.purities[purity];
+                } else {
+                    prev[resource] += gameConfig.purities[purity];
+                }
+
+                return prev;
+            }, {} as Record<ResourceName, number>);
+
+            res(totalResource);
+        });
+    });
+
 export default resourceNodesLayer;
+export { resourceSummary };

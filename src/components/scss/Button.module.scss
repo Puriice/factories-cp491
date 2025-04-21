@@ -1,0 +1,12 @@
+.root {
+	padding: .4rem .5rem;
+	background: #fff;
+	border: 1px solid #000;
+	cursor: pointer;
+
+	&:disabled {
+		background: #ddd;
+		border: 1px solid #d0d0d0;
+		cursor: default;
+	}
+}

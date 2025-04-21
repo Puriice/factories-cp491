@@ -1,0 +1,14 @@
+.root {
+	display: grid;
+	align-content: center;
+	height: 100%;
+	grid-template-columns: repeat(auto-fit, 64px);
+	grid-template-rows: repeat(auto-fit, 64px);
+	gap: 4px;
+}
+
+.item {
+	width: 64px;
+	height: 64px;
+	background: #333;
+}

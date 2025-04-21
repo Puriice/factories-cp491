@@ -1,0 +1,66 @@
+.root {
+	min-height: 50%;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.center {
+	display: grid;
+	grid-template-rows: auto;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-areas:
+		"title title title"
+		". name ."
+		"purity . rate"
+		"button button button";
+	width: 70%;
+	gap: 1rem 0;
+}
+
+.title {
+	grid-area: title;
+	text-align: center;
+}
+
+.name__box {
+	grid-area: name;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.icon {
+	width: 120px;
+	height: 120px;
+}
+
+.detail {
+	display: flex;
+	justify-content: space-between;
+}
+
+.detail__box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	&:nth-of-type(2) {
+		grid-area: purity;
+	}
+
+	&:last-of-type {
+		grid-area: rate;
+	}
+}
+
+.detail__name {
+	font-size: smaller;
+	color: #ababab;
+}
+
+.button {
+	grid-area: button;
+}

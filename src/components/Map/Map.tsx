@@ -1,41 +1,39 @@
-import Map from "@arcgis/core/Map";
-import MapView from "@arcgis/core/views/MapView";
 import esriConfig from "@arcgis/core/config";
-import { useEffect, useRef, useState } from "react";
-import style from "./scss/index.module.scss";
-import arcgisConfig from "../../../config/arcgis.json";
-import resourceNodesLayer from "../../layers/resourceNodes";
+import { useEffect, useRef } from "react";
+import style from "./scss/Map.module.scss";
+import resourceNodesLayer, {
+    resourceSummary,
+} from "../../layers/resourceNodes";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import gameConfig from "../../../config/game.json";
 import { ResourceNode } from "../../types/resources";
+import { ListItem } from "../List/List";
+import ResourceNodeImg from "../../assets/ResourceNodeImg";
+import MapService from "../../services/Map";
+import { SidebarAction } from "../../App";
 
-function MapWindow() {
+function isGraphicHit(
+    viewHit: __esri.MapViewViewHit
+): viewHit is __esri.MapViewGraphicHit {
+    return viewHit.type == "graphic";
+}
+
+function MapWindow(props: MapWindowProps) {
+    const { dispatch } = props;
+
     esriConfig.apiKey =
         "AAPTxy8BH1VEsoebNVZXo8HurNZ-ICH9Ibiwmmwlxup4Wa-SGmG3n61UjtxoWG-0XYRb66sJ27N6PTnsN2fTMgerBaqh7TeZgMp3a_RneVXaZm8KY_xPXm3Vy0BU_cwmq8XLadrideqfSdHfsupgkKDG2Q87_1JY_lBrqItIyK8unkV-BFPnSRin5O0OvE6KbhGGHHQt70PfTYctDaOfKJQUGLVOlzOhcSuPhT3xFcvCwpCFRroupma1co4UQSbZrD5WAT1_qI5ZhzZb";
-
-    const [, setMap] = useState<Map | null>(null);
-    const [, setMapView] = useState<MapView | null>(null);
 
     const selectButtonRef = useRef<HTMLDivElement>(null);
     const lineButtonRef = useRef<HTMLDivElement>(null);
     const clearButtonRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const map = new Map({
-            layers: [resourceNodesLayer],
-            ...arcgisConfig.map,
-        });
-
-        const view = new MapView({
-            map: map,
-            ...arcgisConfig.mapView,
-        });
-
-        setMap(map);
-        setMapView(view);
-
         const drawGraphicLayer = new GraphicsLayer();
+        const mapService = new MapService();
+        const map = mapService.getMap();
+        const view = mapService.getMapView();
 
         map.add(drawGraphicLayer);
 
@@ -60,27 +58,67 @@ function MapWindow() {
         sketchViewModel.on("create", async (event) => {
             // const features = resourceNodesLayer.queryFeatures();
             if (event.state != "complete") return;
-            const featureSet = await resourceNodesLayer.queryFeatures({
+            const featureSet = resourceNodesLayer.queryFeatures({
                 geometry: event.graphic.geometry,
             });
 
-            const { features } = featureSet;
+            const [{ features }, totalResource] = await Promise.all([
+                featureSet,
+                resourceSummary,
+            ]);
 
             const summary = features.reduce((prev, curr) => {
                 const { resource, purity } =
                     curr.attributes as unknown as ResourceNode;
 
                 if (!Object.prototype.hasOwnProperty.call(prev, resource)) {
-                    prev[resource] = gameConfig.purities[purity];
+                    prev[resource] = {
+                        value: gameConfig.purities[purity],
+                        maxValue: totalResource[resource],
+                        icon: ResourceNodeImg[resource],
+                    };
                 } else {
-                    prev[resource] += gameConfig.purities[purity];
+                    prev[resource].value += gameConfig.purities[purity];
                 }
 
                 return prev;
-            }, {} as Record<string, number>);
+            }, {} as Record<string, ListItem>);
 
-            console.log(summary);
+            dispatch({
+                type: "summary",
+                payload: summary,
+            });
         });
+
+        view.on("immediate-click", async (event) => {
+            if (event.buttons != 0) return;
+            event.stopPropagation();
+
+            const { results } = await view.hitTest(event, {
+                include: resourceNodesLayer,
+            });
+
+            if (!results.length) return;
+            const [node] = results;
+
+            if (!isGraphicHit(node)) return;
+
+            const { attributes }: { attributes: ResourceNode } = node.graphic;
+
+            const { name, resource, purity } = attributes;
+
+            dispatch({
+                type: "resource-click",
+                payload: {
+                    name,
+                    resource,
+                    purity,
+                },
+            });
+        });
+
+        return () => {};
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -115,3 +153,7 @@ function MapWindow() {
 }
 
 export default MapWindow;
+
+export interface MapWindowProps {
+    dispatch: React.ActionDispatch<[action: SidebarAction]>;
+}
