@@ -23,14 +23,14 @@ function sidebarReducer(
 
     return {
         type: "default",
-        element: <Inventory items={[]} />,
+        element: <Inventory />,
     };
 }
 
 function App() {
     const [state, dispatch] = useReducer(sidebarReducer, {
         type: "default",
-        element: <Inventory items={[]} />,
+        element: <Inventory />,
     });
 
     return (
