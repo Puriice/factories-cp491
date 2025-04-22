@@ -1,4 +1,3 @@
-import esriConfig from "@arcgis/core/config";
 import { useEffect, useRef } from "react";
 import style from "./scss/Map.module.scss";
 import resourceNodesLayer, {
@@ -10,7 +9,7 @@ import gameConfig from "../../../config/game.json";
 import { ResourceNode } from "../../types/resources";
 import { ListItem } from "../List/List";
 import ResourceNodeImg from "../../assets/ResourceNodeImg";
-import MapService from "../../services/Map";
+import MapService from "../../services/MapServices";
 import { SidebarAction } from "../../App";
 
 function isGraphicHit(
@@ -21,9 +20,6 @@ function isGraphicHit(
 
 function MapWindow(props: MapWindowProps) {
     const { dispatch } = props;
-
-    esriConfig.apiKey =
-        "AAPTxy8BH1VEsoebNVZXo8HurNZ-ICH9Ibiwmmwlxup4Wa-SGmG3n61UjtxoWG-0XYRb66sJ27N6PTnsN2fTMgerBaqh7TeZgMp3a_RneVXaZm8KY_xPXm3Vy0BU_cwmq8XLadrideqfSdHfsupgkKDG2Q87_1JY_lBrqItIyK8unkV-BFPnSRin5O0OvE6KbhGGHHQt70PfTYctDaOfKJQUGLVOlzOhcSuPhT3xFcvCwpCFRroupma1co4UQSbZrD5WAT1_qI5ZhzZb";
 
     const selectButtonRef = useRef<HTMLDivElement>(null);
     const lineButtonRef = useRef<HTMLDivElement>(null);

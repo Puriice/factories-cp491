@@ -3,9 +3,23 @@ import style from "./scss/Inventory.module.scss";
 import gameConfig from "../../../config/game.json";
 import useInventory from "../../hook/useInventory";
 import people from "../../assets/img/people.png";
+import { Suspense, use, useState } from "react";
 
 function Inventory() {
-    const inventory = useInventory();
+    // const inventory = useInventory();
+
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <InventoryRenderer />
+        </Suspense>
+    );
+}
+
+function InventoryRenderer() {
+    const [inventoryPromise, deleteItem] = useInventory();
+    const inventory = use(inventoryPromise);
+    const [checked, setChecked] = useState("");
+
     const items = inventory.concat(
         Array(gameConfig.inventorySize - inventory.length).fill(null)
     );
@@ -29,9 +43,19 @@ function Inventory() {
                 </div>
             </div>
             <div className={style.items}>
-                {items.map((item) => (
-                    <Item key={randomValue()} item={item} />
-                ))}
+                {items.map((item, index) => {
+                    const id = randomValue();
+                    return (
+                        <Item
+                            key={id}
+                            id={String(index)}
+                            item={item}
+                            checked={checked}
+                            setChecked={setChecked}
+                            deleteFn={deleteItem}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

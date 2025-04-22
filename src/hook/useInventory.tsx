@@ -1,109 +1,70 @@
-import { useEffect, useMemo, useState } from "react";
-import { InventoryItem } from "../components/Inventory/Item";
-import Copper from "../assets/img/resources/copper.png";
-import Iron from "../assets/img/resources/iron.png";
+import { useState } from "react";
+import inventoryLayer from "../layers/inventroyLayer";
+import useLocalStorage from "./useLocalStorage";
+import useRandom from "./useRandom";
+import Graphic from "@arcgis/core/Graphic";
 
-export default function useIntentory() {
-    const inventoryItem: InventoryItem[] = [
-        {
-            name: "Reinforced Iron Plate",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-        {
-            name: "Copper",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-        {
-            name: "Copper",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-        {
-            name: "Copper",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-        {
-            name: "Copper",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-        {
-            name: "Copper",
-            count: 21,
-            icon: Copper,
-        },
-        {
-            name: "Iron",
-            count: 12,
-            icon: Iron,
-        },
-        {
-            name: "Iron",
-            count: 53,
-            icon: Iron,
-        },
-    ];
+let inventroyItems: InventoryItem[] | null = null;
 
-    const item = useMemo(() => inventoryItem, []);
+async function queryInventory(userId: string): Promise<InventoryItem[]> {
+    const featureSet = await inventoryLayer.queryFeatures({
+        where: `owner = '${userId}'`,
+        outFields: ["OBJECTID", "name", "n", "icon"],
+        returnGeometry: false,
+    });
 
-    const [inventory, setInventory] = useState(item);
+    const { features } = featureSet;
 
-    useEffect(() => {
-        setInventory(item);
-    }, [item]);
+    if (!features.length) return [];
 
-    return inventory;
+    return features.map(({ attributes }) => attributes);
+}
+
+export type InventoryList = Promise<InventoryItem[]>;
+export type DeleteItem = (objectId: number[]) => Promise<__esri.EditsResult>;
+
+export type useInventoryReturns = [InventoryList, DeleteItem];
+
+export default function useIntentory(): useInventoryReturns {
+    const [userId] = useLocalStorage("userid", useRandom());
+
+    const [inventory, setInventory] = useState<Promise<InventoryItem[]>>(
+        async () => {
+            if (inventroyItems !== null) return inventroyItems;
+
+            inventroyItems = await queryInventory(userId);
+
+            return inventroyItems;
+        }
+    );
+
+    async function deleteItem(objectId: number[]) {
+        const result = await inventoryLayer.applyEdits({
+            deleteFeatures: objectId.map(
+                (id) =>
+                    new Graphic({
+                        attributes: {
+                            OBJECTID: id,
+                        },
+                    })
+            ),
+        });
+
+        inventroyItems = await queryInventory(userId);
+
+        if (!inventroyItems) return result;
+
+        setInventory(new Promise((res) => res(inventroyItems!)));
+
+        return result;
+    }
+
+    return [inventory, deleteItem];
+}
+
+export interface InventoryItem {
+    OBJECTID: number;
+    name: string;
+    n: number;
+    icon: string;
 }
