@@ -1,42 +1,61 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import inventoryLayer from "../layers/inventroyLayer";
-import useLocalStorage from "./useLocalStorage";
-import useRandom from "./useRandom";
 import Graphic from "@arcgis/core/Graphic";
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import useUserId from "./useUserId";
 
 let inventroyItems: InventoryItem[] | null = null;
 
-async function queryInventory(userId: string): Promise<InventoryItem[]> {
-    const featureSet = await inventoryLayer.queryFeatures({
-        where: `owner = '${userId}'`,
-        outFields: ["OBJECTID", "name", "n", "icon"],
+export async function query<R>(
+    userId: string,
+    layer: FeatureLayer,
+    outFields: string[],
+    where: string = "1 = 1"
+): Promise<R[]> {
+    const featureSet = await layer.queryFeatures({
+        where: `owner = '${userId}' AND ${where}`,
+        outFields,
         returnGeometry: false,
     });
 
     const { features } = featureSet;
 
-    if (!features.length) return [];
+    if (!features || !features.length) return [];
 
     return features.map(({ attributes }) => attributes);
 }
 
-export type InventoryList = Promise<InventoryItem[]>;
+export type InventoryList = InventoryItem[];
 export type DeleteItem = (objectId: number[]) => Promise<__esri.EditsResult>;
 
 export type useInventoryReturns = [InventoryList, DeleteItem];
 
 export default function useIntentory(): useInventoryReturns {
-    const [userId] = useLocalStorage("userid", useRandom());
+    const userId = useUserId();
+    const outFields = useMemo(() => ["OBJECTID", "name", "n", "icon"], []);
 
-    const [inventory, setInventory] = useState<Promise<InventoryItem[]>>(
-        async () => {
-            if (inventroyItems !== null) return inventroyItems;
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
-            inventroyItems = await queryInventory(userId);
+    useEffect(() => {
+        let isMounted = true;
 
-            return inventroyItems;
-        }
-    );
+        const loadInventory = async () => {
+            const items = await query<InventoryItem>(
+                userId,
+                inventoryLayer,
+                outFields
+            );
+            if (isMounted) {
+                setInventory(items);
+            }
+        };
+
+        loadInventory();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [userId, outFields]);
 
     async function deleteItem(objectId: number[]) {
         const result = await inventoryLayer.applyEdits({
@@ -50,11 +69,11 @@ export default function useIntentory(): useInventoryReturns {
             ),
         });
 
-        inventroyItems = await queryInventory(userId);
+        inventroyItems = await query(userId, inventoryLayer, outFields);
 
         if (!inventroyItems) return result;
 
-        setInventory(new Promise((res) => res(inventroyItems!)));
+        setInventory(inventroyItems);
 
         return result;
     }

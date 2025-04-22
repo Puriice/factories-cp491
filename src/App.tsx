@@ -6,7 +6,7 @@ import ResourceInfo, { ResourceDetail } from "./components/ResourceInfo";
 import Inventory from "./components/Inventory/inventory";
 
 function sidebarReducer(
-    state: SidebarState,
+    _state: SidebarState,
     action: SidebarAction
 ): SidebarState {
     if (action.type == "summary") {

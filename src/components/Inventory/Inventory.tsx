@@ -3,21 +3,13 @@ import style from "./scss/Inventory.module.scss";
 import gameConfig from "../../../config/game.json";
 import useInventory from "../../hook/useInventory";
 import people from "../../assets/img/people.png";
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
+import useCoin from "../../hook/useCoin";
 
 function Inventory() {
-    // const inventory = useInventory();
+    const [coin] = useCoin();
+    const [inventory, deleteItem] = useInventory();
 
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <InventoryRenderer />
-        </Suspense>
-    );
-}
-
-function InventoryRenderer() {
-    const [inventoryPromise, deleteItem] = useInventory();
-    const inventory = use(inventoryPromise);
     const [checked, setChecked] = useState("");
 
     const items = inventory.concat(
@@ -38,7 +30,10 @@ function InventoryRenderer() {
                     <img src={people} alt="" className={style.coin__img} />
                     <div className={style.coin__name}>Workers</div>
                     <div className={style.coin__info}>
-                        <span className={style.coin__using}>12</span>/30
+                        <span className={style.coin__using}>
+                            {coin?.avaliable}
+                        </span>
+                        /{coin?.total}
                     </div>
                 </div>
             </div>
