@@ -51,7 +51,7 @@
 		grid-area: purity;
 	}
 
-	&:last-of-type {
+	&:nth-of-type(3) {
 		grid-area: rate;
 	}
 }
@@ -61,6 +61,17 @@
 	color: #ababab;
 }
 
-.button {
+.button__list {
 	grid-area: button;
+	display: flex;
+	flex-direction: column;
+	gap: .25rem;
+}
+
+.button {
+	width: 100%;
+
+	&:first-of-type {
+		margin-bottom: 1rem;
+	}
 }

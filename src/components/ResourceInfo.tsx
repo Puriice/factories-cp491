@@ -1,12 +1,25 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useMemo } from "react";
 import { Purities, ResourceName } from "../types/resources";
 import style from "./scss/ResourceInfo.module.scss";
 import ResourceNodeImg from "../assets/ResourceNodeImg";
 import gameConfig from "../../config/game.json";
 import Button from "./Button";
+import useWorkerAssignment from "../hook/useWorkerAssignment";
+import useWorker from "../hook/useWorker";
 
 function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
+    const [worker] = useWorker();
+    const { occupiedWorker, assignWorker, unassignWorker, isReserved } =
+        useWorkerAssignment();
     const { info } = props;
+
+    const isReserve = useMemo(
+        () => isReserved(occupiedWorker, info.OBJECTID, info.name),
+        [info.OBJECTID, info.name, isReserved, occupiedWorker]
+    );
+
+    console.log({ isReserve });
+
     return (
         <div className={style.root}>
             <div className={style.center}>
@@ -29,9 +42,32 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
                     </div>
                     <div className={style.detail__name}>Resource/Minute</div>
                 </div>
-                <Button className={style.button} disabled>
-                    Assign People
-                </Button>
+                <div className={style.button__list}>
+                    <Button
+                        className={style.button}
+                        disabled={worker.avaliable <= 0 || isReserve}
+                        onClick={() => assignWorker(info.OBJECTID, info.name)}
+                    >
+                        Assign Worker ({worker.avaliable} / {worker.total})
+                    </Button>
+                    {isReserve ? (
+                        <>
+                            <Button
+                                className={style.button}
+                                onClick={() =>
+                                    unassignWorker(info.OBJECTID, info.name)
+                                }
+                            >
+                                Unassign Worker
+                            </Button>
+                            <Button className={style.button}>
+                                Collect Resource
+                            </Button>
+                        </>
+                    ) : (
+                        <></>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -40,6 +76,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
 export default ResourceInfo;
 
 export interface ResourceDetail {
+    OBJECTID: number;
     name: string;
     resource: ResourceName;
     purity: Purities;

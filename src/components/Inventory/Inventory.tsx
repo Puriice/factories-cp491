@@ -4,11 +4,14 @@ import gameConfig from "../../../config/game.json";
 import useInventory from "../../hook/useInventory";
 import people from "../../assets/img/people.png";
 import { useState } from "react";
-import useCoin from "../../hook/useCoin";
+import useWorker from "../../hook/useWorker";
+import useWorkerAssignment from "../../hook/useWorkerAssignment";
 
 function Inventory() {
-    const [coin] = useCoin();
+    const [worker] = useWorker();
+    const { occupiedWorker } = useWorkerAssignment();
     const [inventory, deleteItem] = useInventory();
+    console.log(worker);
 
     const [checked, setChecked] = useState("");
 
@@ -27,13 +30,26 @@ function Inventory() {
         <div className={style.root}>
             <div className={style.coins}>
                 <div className={style.coin}>
+                    {worker.avaliable != worker.total ? (
+                        <div className={style.coin__popup}>
+                            <ul className={style.coin__popup__list}>
+                                {occupiedWorker.map((worker) => (
+                                    <li key={worker.OBJECTID}>
+                                        {worker.targetName}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
                     <img src={people} alt="" className={style.coin__img} />
                     <div className={style.coin__name}>Workers</div>
                     <div className={style.coin__info}>
                         <span className={style.coin__using}>
-                            {coin?.avaliable}
+                            {worker.avaliable}
                         </span>
-                        /{coin?.total}
+                        /{worker.total}
                     </div>
                 </div>
             </div>

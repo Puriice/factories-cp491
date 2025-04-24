@@ -21,7 +21,40 @@
 
 	place-content: center;
 	place-items: center;
+
+	position: relative;
+
 }
+
+.coin__popup {
+	background: #fff;
+	position: absolute;
+	bottom: -100%;
+	width: max-content;
+	z-index: 4;
+	display: none;
+
+	border-top: 3px solid #9f29f0;
+
+	&__list {
+		margin: 0;
+		padding: 0 16px 0 32px;
+	}
+
+	.coin:hover & {
+		display: block;
+	}
+
+	&::after {
+		content: "▲";
+		position: absolute;
+		top: -100%;
+		left: 50%;
+		transform: translate(-50%, 25%);
+		color: #9f29f0;
+	}
+}
+
 
 .coin__img {
 	grid-area: img;

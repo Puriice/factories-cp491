@@ -102,13 +102,21 @@ function MapWindow(props: MapWindowProps) {
 
             if (!isGraphicHit(node)) return;
 
-            const { attributes }: { attributes: ResourceNode } = node.graphic;
+            const {
+                attributes,
+            }: { attributes: ResourceNode & { __OBJECTID: number } } =
+                node.graphic;
 
-            const { name, resource, purity } = attributes;
+            console.log(attributes);
+
+            const { __OBJECTID, name, resource, purity } = attributes;
+
+            console.log({ __OBJECTID });
 
             dispatch({
                 type: "resource-click",
                 payload: {
+                    OBJECTID: __OBJECTID,
                     name,
                     resource,
                     purity,

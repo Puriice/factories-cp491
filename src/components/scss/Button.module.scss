@@ -1,7 +1,8 @@
 .root {
-	padding: .4rem .5rem;
+	padding: .6rem .5rem;
 	background: #fff;
-	border: 1px solid #000;
+	border: 1.5px solid #d0d0d0;
+	border-radius: 6px;
 	cursor: pointer;
 
 	&:disabled {

@@ -4,26 +4,27 @@ import { query } from "./useInventory";
 import coinLayer from "../layers/coinLayer";
 import Graphic from "@arcgis/core/Graphic";
 
-// let coinsItem: Coin | null = null;
-export type CoinModificationFunction = (amount?: number) => Promise<boolean>;
+export type WorkerModificationFunction = (amount?: number) => Promise<boolean>;
 
-export interface CoinAvaliableModificationFunction {
-    increaseCoin: CoinModificationFunction;
-    decreaseCoin: CoinModificationFunction;
+export interface WorkerAvaliableModificationFunction {
+    increaseWorker: WorkerModificationFunction;
+    decreaseWorker: WorkerModificationFunction;
 }
 
-export interface CoinTotalModificationFunction {
-    increaseTotal: CoinModificationFunction;
-    decreaseTotal: CoinModificationFunction;
+export interface WorkerTotalModificationFunction {
+    increaseTotal: WorkerModificationFunction;
 }
 
-export type UseCoinReturn = [
+export type UseWorkerReturn = [
     Coin,
-    CoinAvaliableModificationFunction,
-    CoinTotalModificationFunction
+    WorkerAvaliableModificationFunction,
+    WorkerTotalModificationFunction
 ];
 
-export default function useCoin(kind: CoinType = "Worker"): UseCoinReturn {
+const workerCache: Coin | null = null;
+
+export default function useWorker(): UseWorkerReturn {
+    const kind = "Worker";
     const userId = useUserId();
 
     const outFields = useMemo(
@@ -31,14 +32,19 @@ export default function useCoin(kind: CoinType = "Worker"): UseCoinReturn {
         []
     );
 
-    const [coin, setCoin] = useState<Coin>({
-        OBJECTID: -1,
+    const [worker, setWorker] = useState<Coin>({
+        OBJECTID: -999,
         kind,
-        avaliable: 1,
-        total: 1,
+        avaliable: 0,
+        total: 0,
     });
 
     useEffect(() => {
+        if (workerCache) {
+            setWorker(workerCache);
+            return;
+        }
+
         let isMounted = true;
 
         const loadCoin = async () => {
@@ -65,11 +71,22 @@ export default function useCoin(kind: CoinType = "Worker"): UseCoinReturn {
 
                 console.debug(result.addFeatureResults);
 
-                return await loadCoin();
+                return loadCoin();
             }
 
             if (isMounted) {
-                setCoin(coin[0]);
+                setWorker(coin[0]);
+            }
+            if (coin.length > 1) {
+                await coinLayer.applyEdits({
+                    deleteFeatures: coin.slice(1).map((coin) => {
+                        return new Graphic({
+                            attributes: {
+                                OBJECTID: coin.OBJECTID,
+                            },
+                        });
+                    }),
+                });
             }
         };
 
@@ -84,65 +101,53 @@ export default function useCoin(kind: CoinType = "Worker"): UseCoinReturn {
         modifyFunction: (amount: number) => Partial<Coin>
     ) {
         return async function (amount: number = 1) {
-            const targetCoin = modifyFunction(amount);
+            const targetWorker = modifyFunction(amount);
             const result = await coinLayer.applyEdits({
                 updateFeatures: [
                     new Graphic({
                         attributes: {
-                            ...coin,
-                            ...targetCoin,
+                            ...worker,
+                            ...targetWorker,
                             owner: userId,
                         },
                     }),
                 ],
             });
 
-            if (result.updateFeatureResults.some((r) => r.error === null)) {
+            if (result.updateFeatureResults.some((r) => r.error !== null)) {
                 console.error(result.updateFeatureResults);
 
                 return false;
             }
 
-            setCoin({
-                ...coin,
-                ...targetCoin,
+            setWorker({
+                ...worker,
+                ...targetWorker,
             });
 
             return true;
         };
     }
 
-    const increaseCoin = createModificationCoin((amount) => {
+    const increaseWorker = createModificationCoin((amount) => {
         return {
-            avaliable: Math.min(coin.total, coin.avaliable + amount),
+            avaliable: Math.min(worker.total, worker.avaliable + amount),
         };
     });
 
-    const decreaseCoin = createModificationCoin((amount) => {
+    const decreaseWorker = createModificationCoin((amount) => {
         return {
-            avaliable: Math.max(0, coin.avaliable - amount),
+            avaliable: Math.max(0, worker.avaliable - amount),
         };
     });
 
     const increaseTotal = createModificationCoin((amount) => {
         return {
-            total: coin.total + amount,
+            total: worker.total + amount,
         };
     });
 
-    const decreaseTotal = createModificationCoin((amount) => {
-        const targetTotal = Math.max(1, coin.total - amount);
-        return {
-            total: targetTotal,
-            avaliable: Math.min(coin.avaliable, targetTotal),
-        };
-    });
-
-    return [
-        coin,
-        { increaseCoin, decreaseCoin },
-        { increaseTotal, decreaseTotal },
-    ];
+    return [worker, { increaseWorker, decreaseWorker }, { increaseTotal }];
 }
 
 type CoinType = "Worker";
