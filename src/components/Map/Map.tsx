@@ -49,6 +49,7 @@ function MapWindow(props: MapWindowProps) {
 
         clearButtonRef.current?.addEventListener("click", () => {
             drawGraphicLayer.removeAll();
+            resourceNodesLayer.featureEffect = null;
             dispatch({
                 type: "default",
             });
@@ -57,6 +58,16 @@ function MapWindow(props: MapWindowProps) {
         sketchViewModel.on("create", async (event) => {
             // const features = resourceNodesLayer.queryFeatures();
             if (event.state != "complete") return;
+
+            resourceNodesLayer.featureEffect = {
+                filter: {
+                    geometry: event.graphic.geometry,
+                },
+                includedEffect:
+                    "drop-shadow(3px, 3px, 3px, gray) brightness(1.2)",
+                excludedEffect: "opacity(30%)",
+            };
+
             const featureSet = resourceNodesLayer.queryFeatures({
                 geometry: event.graphic.geometry,
             });
@@ -107,11 +118,7 @@ function MapWindow(props: MapWindowProps) {
             }: { attributes: ResourceNode & { __OBJECTID: number } } =
                 node.graphic;
 
-            console.log(attributes);
-
             const { __OBJECTID, name, resource, purity } = attributes;
-
-            console.log({ __OBJECTID });
 
             dispatch({
                 type: "resource-click",
@@ -125,8 +132,7 @@ function MapWindow(props: MapWindowProps) {
         });
 
         return () => {};
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [dispatch]);
 
     return (
         <div className={style.root}>
