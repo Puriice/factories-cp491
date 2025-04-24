@@ -1,5 +1,5 @@
 export type ResourceName = "Iron" | "Copper" | "Coal" | "Wood"
-export type Purities = "Pure" | "Normal" | "Impure";
+export type Purities = "Purest" | "Pure" | "Normal" | "Impure";
 
 export interface ResourceNode {
 	name: string;
