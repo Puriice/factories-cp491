@@ -3,10 +3,10 @@ import style from "./App.module.scss";
 import List, { ListItem } from "./components/List/List";
 import MapWindow from "./components/Map/Map";
 import ResourceInfo, { ResourceDetail } from "./components/ResourceInfo";
-import Inventory from "./components/Inventory/inventory";
 import Loading from "./components/Loading";
 import { loadWorkerService } from "./services/GameWorkerService";
 import { loadInventoryService } from "./services/GameInventoryService";
+import DefaultSidebar from "./components/DefaultSidebar";
 
 function sidebarReducer(
     _state: SidebarState,
@@ -26,7 +26,7 @@ function sidebarReducer(
 
     return {
         type: "default",
-        element: <Inventory />,
+        element: <DefaultSidebar />,
     };
 }
 
@@ -48,7 +48,7 @@ function AppLoader() {
 function AppRenderer() {
     const [state, dispatch] = useReducer(sidebarReducer, {
         type: "default",
-        element: <Inventory />,
+        element: <DefaultSidebar />,
     });
 
     return (

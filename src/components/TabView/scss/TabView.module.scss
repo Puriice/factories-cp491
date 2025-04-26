@@ -1,0 +1,39 @@
+@use "../../../assets/scss/color" as *;
+@use 'sass:color';
+
+.root {
+	width: 100%;
+	height: 100%;
+}
+
+.button__list {
+	display: flex;
+	padding: 1rem 0;
+	justify-content: center;
+}
+
+.button {
+	flex: 1 1 0;
+	padding: .5rem 1rem;
+	background: none;
+	border: 1px solid #d0d0d0;
+	cursor: pointer;
+
+	&:not(:last-child) {
+		border-right: none;
+	}
+
+	&.active {
+		background: color.adjust($purple, $lightness: 30%);
+	}
+}
+
+.button__icon {
+	width: 40px;
+}
+
+.button__name {
+	margin-top: 8px;
+	text-transform: capitalize;
+	font-size: larger;
+}

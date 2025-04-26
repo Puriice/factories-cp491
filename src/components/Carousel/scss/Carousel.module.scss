@@ -1,0 +1,21 @@
+.root {
+	width: 100%;
+	height: max-content;
+	overflow: hidden;
+	padding: .2rem;
+}
+
+.sliding__window {
+	$gap: var(--gap);
+	display: flex;
+	gap: $gap;
+	position: relative;
+	width: calc(calc(100% + $gap) * var(--count) - $gap);
+	left: calc(calc(-100% - $gap) * var(--index));
+
+	transition: left .4s;
+}
+
+.item {
+	width: 100%;
+}
