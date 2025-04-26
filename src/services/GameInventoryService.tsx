@@ -60,6 +60,8 @@ export default class GameInventoryService {
 
         if (result.deleteFeatureResults[0].error == null) return true;
 
+        console.error(result.deleteFeatureResults);
+
         this.items = oldItems;
 
         return false;

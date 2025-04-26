@@ -3,7 +3,7 @@ import style from "./scss/Inventory.module.scss";
 import gameConfig from "../../../config/game.json";
 import useInventory from "../../hook/useInventory";
 import people from "../../assets/img/people.png";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useWorker from "../../hook/useWorker";
 import useWorkerAssignment from "../../hook/useWorkerAssignment";
 
@@ -14,12 +14,20 @@ function Inventory() {
 
     const [checked, setChecked] = useState("");
 
-    const defaultItems = inventory.concat(
-        Array(gameConfig.inventorySize - inventory.length).fill(null)
+    const defaultItems = useMemo(
+        () =>
+            inventory.concat(
+                Array(gameConfig.inventorySize - inventory.length).fill(null)
+            ),
+        [inventory]
     );
 
     const [items, setItems] = useState(defaultItems);
     const [search, setSearchValue] = useState("");
+
+    useEffect(() => {
+        setItems(defaultItems);
+    }, [defaultItems]);
 
     const randomValue = () => {
         const array = new Uint32Array(10);
