@@ -19,6 +19,7 @@ const resourceNodesLayer = new CSVLayer({
     popupTemplate: {
         title: "{name}",
         content: `
+			<img src="${window.location.origin}/src/assets/img/resources/{resource}.png" alt="{resource} image" width="50%"> <br>
 			<b>Resource Type: </b> {resource} <br>
 			<b>Purity: </b> {purity} <br>
 		`,

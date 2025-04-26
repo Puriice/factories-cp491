@@ -100,7 +100,7 @@ function MapWindow(props: MapWindowProps) {
             });
         });
 
-        view.on("immediate-click", async (event) => {
+        view.on("click", async (event) => {
             if (event.buttons != 0) return;
             event.stopPropagation();
 
@@ -108,10 +108,19 @@ function MapWindow(props: MapWindowProps) {
                 include: resourceNodesLayer,
             });
 
-            if (!results.length) return;
+            if (!results.length) {
+                view.closePopup();
+                dispatch({ type: "default" });
+                return;
+            }
             const [node] = results;
 
             if (!isGraphicHit(node)) return;
+
+            view.openPopup({
+                features: [node.graphic],
+                location: event.mapPoint,
+            });
 
             const {
                 attributes,

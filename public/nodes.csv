@@ -1,7 +1,7 @@
-﻿name,resource,purity,latitude,longitude
-Siam Paragon,Iron,Pure,13.7458,100.5344
-Central Rama 9,Coal,Normal,13.7585,100.566
-Srinakharinwirot University,Copper,Impure,13.7433,100.5663
+﻿name,resource,purity,latitude,longitude,image
+Siam Paragon,Iron,Pure,13.7458,100.5344,/src/assets/img/resources/iron.png
+Central Rama 9,Coal,Normal,13.7585,100.566,/src/assets/img/resources/coal.png
+Srinakharinwirot University,Copper,Impure,13.7433,100.5663,/src/assets/img/resources/copper.png
 Singha Complex,Copper,Pure,13.7481,100.5646
 centralwOrld,Coal,Normal,13.7465,100.5391
 Benchakitti Park,Wood,Normal,13.7292,100.5586
