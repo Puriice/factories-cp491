@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import style from "./scss/Inventory.module.scss";
-import { DeleteItem, InventoryItem } from "../../hook/useInventory";
+import { DeleteItem } from "../../hook/useInventory";
+import { InventoryItem } from "../../services/GameInventoryService";
 function Item(props: ItemProps) {
     const { item } = props;
     const { checked, setChecked } = props;
@@ -31,7 +32,7 @@ function Item(props: ItemProps) {
             <div className={style.lists}>
                 <button
                     className={style.btn}
-                    onClick={() => props.deleteFn([item.OBJECTID])}
+                    onClick={() => props.deleteFn(item.OBJECTID)}
                 >
                     Delete
                 </button>

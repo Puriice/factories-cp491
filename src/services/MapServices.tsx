@@ -2,6 +2,8 @@ import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import resourceNodesLayer from "../layers/resourceNodes";
 import arcgisConfig from "../../config/arcgis.json";
+import esriConfig from "@arcgis/core/config";
+import config from "../../config/arcgis.json";
 
 export default class MapService {
     private static instance: MapService | null = null;
@@ -10,6 +12,8 @@ export default class MapService {
 
     constructor() {
         if (MapService.instance != null) return MapService.instance;
+
+        esriConfig.apiKey = config.apiKey;
 
         MapService.instance = this;
         this.map = new Map({

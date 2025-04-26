@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren } from "react";
 import { Purities, ResourceName } from "../types/resources";
 import style from "./scss/ResourceInfo.module.scss";
 import ResourceNodeImg from "../assets/ResourceNodeImg";
@@ -13,10 +13,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
         useWorkerAssignment();
     const { info } = props;
 
-    const isReserve = useMemo(
-        () => isReserved(occupiedWorker, info.OBJECTID, info.name),
-        [info.OBJECTID, info.name, isReserved, occupiedWorker]
-    );
+    const isReserve = isReserved(occupiedWorker, info.OBJECTID, info.name);
 
     console.log({ isReserve });
 

@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import inventoryLayer from "../layers/inventroyLayer";
-import Graphic from "@arcgis/core/Graphic";
+import { useState } from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import useUserId from "./useUserId";
-
-let inventroyItems: InventoryItem[] | null = null;
+import GameInventoryService, {
+    InventoryItem,
+} from "../services/GameInventoryService";
 
 export async function query<R>(
     userId: string,
@@ -26,64 +24,30 @@ export async function query<R>(
 }
 
 export type InventoryList = InventoryItem[];
-export type DeleteItem = (objectId: number[]) => Promise<__esri.EditsResult>;
+export type DeleteItem = (objectId: number) => Promise<boolean>;
 
 export type useInventoryReturns = [InventoryList, DeleteItem];
 
 export default function useIntentory(): useInventoryReturns {
-    const userId = useUserId();
-    const outFields = useMemo(() => ["OBJECTID", "name", "n", "icon"], []);
+    const inventoryService = new GameInventoryService();
 
-    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const [inventory, setInventory] = useState<InventoryItem[]>(
+        inventoryService.getItems()
+    );
 
-    useEffect(() => {
-        let isMounted = true;
-
-        const loadInventory = async () => {
-            const items = await query<InventoryItem>(
-                userId,
-                inventoryLayer,
-                outFields
-            );
-            if (isMounted) {
-                setInventory(items);
-            }
-        };
-
-        loadInventory();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [userId, outFields]);
-
-    async function deleteItem(objectId: number[]) {
-        const result = await inventoryLayer.applyEdits({
-            deleteFeatures: objectId.map(
-                (id) =>
-                    new Graphic({
-                        attributes: {
-                            OBJECTID: id,
-                        },
-                    })
-            ),
+    async function deleteItem(objectId: number) {
+        setInventory((value) => {
+            return value.filter((item) => item.OBJECTID != objectId);
         });
 
-        inventroyItems = await query(userId, inventoryLayer, outFields);
+        const status = await inventoryService.deleteItem(objectId);
 
-        if (!inventroyItems) return result;
+        if (status) return true;
 
-        setInventory(inventroyItems);
+        setInventory(inventoryService.getItems());
 
-        return result;
+        return false;
     }
 
     return [inventory, deleteItem];
-}
-
-export interface InventoryItem {
-    OBJECTID: number;
-    name: string;
-    n: number;
-    icon: string;
 }

@@ -264,6 +264,11 @@ export default class GameWorkerService {
                 (assignment) => assignment.OBJECTID == tempOBJECTID
             );
 
+            if (index == -1) {
+                console.log(this.workerAssignments);
+                return true;
+            }
+
             this.workerAssignments[index].OBJECTID =
                 assignWorkerResult.addFeatureResults[0].objectId!;
 

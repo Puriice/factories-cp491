@@ -11,7 +11,6 @@ function Inventory() {
     const { worker } = useWorker();
     const { occupiedWorker } = useWorkerAssignment();
     const [inventory, deleteItem] = useInventory();
-    console.log(worker);
 
     const [checked, setChecked] = useState("");
 

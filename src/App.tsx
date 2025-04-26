@@ -6,6 +6,7 @@ import ResourceInfo, { ResourceDetail } from "./components/ResourceInfo";
 import Inventory from "./components/Inventory/inventory";
 import Loading from "./components/Loading";
 import { loadWorkerService } from "./services/GameWorkerService";
+import { loadInventoryService } from "./services/GameInventoryService";
 
 function sidebarReducer(
     _state: SidebarState,
@@ -39,6 +40,7 @@ function App() {
 
 function AppLoader() {
     use(loadWorkerService);
+    use(loadInventoryService);
 
     return <AppRenderer />;
 }
