@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 import { Purities, ResourceName } from "../types/resources";
 import style from "./scss/ResourceInfo.module.scss";
-import ResourceNodeImg from "../assets/ResourceNodeImg";
+import ItemImages from "../assets/ItemImages";
 import gameConfig from "../../config/game.json";
 import Button from "./Button";
 import useWorkerAssignment from "../hook/useWorkerAssignment";
@@ -24,7 +24,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
                 <div className={style.name__box}>
                     <img
                         className={style.icon}
-                        src={ResourceNodeImg[info.resource]}
+                        src={ItemImages[info.resource]}
                         alt={`${info.resource} icon`}
                     />
                     <div className={style.name}>{info.resource}</div>

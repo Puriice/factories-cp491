@@ -8,7 +8,7 @@ import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import gameConfig from "../../../config/game.json";
 import { ResourceNode } from "../../types/resources";
 import { ListItem } from "../List/List";
-import ResourceNodeImg from "../../assets/ResourceNodeImg";
+import ItemImages from "../../assets/ItemImages";
 import MapService from "../../services/MapServices";
 import { SidebarAction } from "../../App";
 import searchWidget from "../../widget/SearchWidget";
@@ -86,7 +86,7 @@ function MapWindow(props: MapWindowProps) {
                     prev[resource] = {
                         value: gameConfig.purities[purity],
                         maxValue: totalResource[resource],
-                        icon: ResourceNodeImg[resource],
+                        icon: ItemImages[resource],
                     };
                 } else {
                     prev[resource].value += gameConfig.purities[purity];

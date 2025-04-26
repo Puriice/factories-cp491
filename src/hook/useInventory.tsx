@@ -3,6 +3,9 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GameInventoryService, {
     InventoryItem,
 } from "../services/GameInventoryService";
+import ItemImages from "../assets/ItemImages";
+import MissingTexture from "../assets/img/missingTexture.png";
+import gameConfig from "../../config/game.json";
 
 export async function query<R>(
     userId: string,
@@ -25,8 +28,13 @@ export async function query<R>(
 
 export type InventoryList = InventoryItem[];
 export type DeleteItem = (objectId: number) => Promise<boolean>;
+export type AppendItem = (name: string, n: number) => Promise<boolean>;
 
-export type useInventoryReturns = [InventoryList, DeleteItem];
+export type useInventoryReturns = {
+    inventory: InventoryList;
+    deleteItem: DeleteItem;
+    appendItem: AppendItem;
+};
 
 export default function useIntentory(): useInventoryReturns {
     const inventoryService = new GameInventoryService();
@@ -49,5 +57,33 @@ export default function useIntentory(): useInventoryReturns {
         return false;
     }
 
-    return [inventory, deleteItem];
+    async function appendItem(name: string, n: number) {
+        if (inventory.length >= gameConfig.inventorySize) return false;
+
+        const tempOBJECTIDArr = new Uint32Array(1);
+
+        crypto.getRandomValues(tempOBJECTIDArr);
+
+        const tempOBJECTID = Number(tempOBJECTIDArr);
+
+        setInventory((value) => {
+            return [
+                ...value,
+                {
+                    name,
+                    n,
+                    icon: ItemImages[name] ?? MissingTexture,
+                    OBJECTID: tempOBJECTID,
+                },
+            ];
+        });
+
+        const result = await inventoryService.appendItem(name, n);
+
+        setInventory(inventoryService.getItems());
+
+        return result;
+    }
+
+    return { inventory, deleteItem, appendItem };
 }

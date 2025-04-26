@@ -10,7 +10,7 @@ import useWorkerAssignment from "../../hook/useWorkerAssignment";
 function Inventory() {
     const { worker } = useWorker();
     const { occupiedWorker } = useWorkerAssignment();
-    const [inventory, deleteItem] = useInventory();
+    const { inventory, deleteItem } = useInventory();
 
     const [checked, setChecked] = useState("");
 

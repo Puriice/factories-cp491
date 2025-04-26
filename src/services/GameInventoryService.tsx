@@ -2,6 +2,8 @@ import Graphic from "@arcgis/core/Graphic";
 import { query } from "../hook/useInventory";
 import inventoryLayer from "../layers/inventroyLayer";
 import getUserId from "./getUserId";
+import MissingTexture from "../assets/img/missingTexture.png";
+import ItemImages from "../assets/ItemImages";
 
 export default class GameInventoryService {
     private static instance: GameInventoryService | null = null;
@@ -57,6 +59,53 @@ export default class GameInventoryService {
         });
 
         if (result.deleteFeatureResults[0].error == null) return true;
+
+        this.items = oldItems;
+
+        return false;
+    }
+
+    public async appendItem(name: string, n: number) {
+        const oldItems = [...this.items];
+
+        const tempOBJECTIDArr = new Uint32Array(1);
+
+        crypto.getRandomValues(tempOBJECTIDArr);
+
+        const tempOBJECTID = Number(tempOBJECTIDArr);
+        const payload: Omit<InventoryItem, "OBJECTID"> = {
+            name,
+            n,
+            icon: ItemImages[name] ?? MissingTexture,
+        };
+
+        this.items.push({
+            ...payload,
+            OBJECTID: tempOBJECTID,
+        });
+
+        const result = await inventoryLayer.applyEdits({
+            addFeatures: [
+                new Graphic({
+                    attributes: payload,
+                }),
+            ],
+        });
+
+        if (result.addFeatureResults[0].error == null) {
+            const itemIndex = this.items.findIndex(
+                (item) => item.OBJECTID == tempOBJECTID
+            );
+
+            if (itemIndex == -1) return true;
+
+            this.items[itemIndex].OBJECTID =
+                result.addFeatureResults[0].objectId!;
+
+            return true;
+        }
+
+        console.error(result.addFeatureResults);
 
         this.items = oldItems;
 

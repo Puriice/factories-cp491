@@ -3,11 +3,11 @@ import Copper from "./img/resources/copper.png";
 import Iron from "./img/resources/iron.png";
 import Wood from "./img/resources/wood.png";
 
-const ResourceNodeImg = {
+const ItemImages: Record<string, string> = {
     Coal,
     Copper,
     Iron,
     Wood,
 };
 
-export default ResourceNodeImg;
+export default ItemImages;

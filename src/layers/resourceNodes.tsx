@@ -1,7 +1,7 @@
 import CSVLayer from "@arcgis/core/layers/CSVLayer";
 import gameConfig from "../../config/game.json";
 import { ResourceName, ResourceNode } from "../types/resources";
-import ResourceNodeImg from "../assets/ResourceNodeImg";
+import ItemImages from "../assets/ItemImages";
 
 const res = await fetch("/nodes.csv");
 const nodes = await res.text();
@@ -35,7 +35,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Copper",
                 symbol: {
                     type: "picture-marker",
-                    url: ResourceNodeImg.Copper,
+                    url: ItemImages.Copper,
                     width: "60px",
                     height: "60px",
                 },
@@ -45,7 +45,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Iron",
                 symbol: {
                     type: "picture-marker",
-                    url: ResourceNodeImg.Iron,
+                    url: ItemImages.Iron,
                     width: "60px",
                     height: "60px",
                 },
@@ -55,7 +55,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Coal",
                 symbol: {
                     type: "picture-marker",
-                    url: ResourceNodeImg.Coal,
+                    url: ItemImages.Coal,
                     width: "60px",
                     height: "60px",
                 },
@@ -65,7 +65,7 @@ const resourceNodesLayer = new CSVLayer({
                 value: "Wood",
                 symbol: {
                     type: "picture-marker",
-                    url: ResourceNodeImg.Wood,
+                    url: ItemImages.Wood,
                     width: "60px",
                     height: "60px",
                 },
