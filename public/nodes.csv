@@ -1,24 +1,24 @@
-﻿name,resource,purity,latitude,longitude,image
-Siam Paragon,Iron,Pure,13.7458,100.5344,/src/assets/img/resources/iron.png
-Central Rama 9,Coal,Normal,13.7585,100.566,/src/assets/img/resources/coal.png
-Srinakharinwirot University,Copper,Impure,13.7433,100.5663,/src/assets/img/resources/copper.png
-Singha Complex,Copper,Pure,13.7481,100.5646
-centralwOrld,Coal,Normal,13.7465,100.5391
-Benchakitti Park,Wood,Normal,13.7292,100.5586
-Lumphini Park,Wood,Pure,13.7314,100.5417
-Terminal 21 Asok,Iron,Normal,13.7379,100.5605
-Fortune Town,Iron,Impure,13.7580,100.5651
-Samyan Mitrtown,Coal,Impure,13.7337,100.5284
-CDG House,Iron,Pure,13.7030,100.5435
-The Mall Lifestore Tha Phra,Copper,Normal,13.7136,100.4800
-The Mall Lifestore Bangkae,Iron,Normal,13.7131,100.4081
-Baiyoke Tower II,Copper,Impure,13.754167,100.540556
-Statue of Liberty,Copper,Purest,40.6892,-74.0445
-Eiffel Tower,Iron,Purest,48.8584,2.2945
-Sao Ching Cha,Wood,Purest,13.7518,100.5013
-Colosseum,Coal,Purest,41.8902,12.4922
-Phraharuthai Donmuang School,Coal,Normal,13.9257,100.5884
-Don Mueang International Airport,Iron,Pure,13.9150,100.6055
-Rommani Thungsikan Park,Wood,Impure,13.9289,100.5682
-Bun Anan Market,Iron,Pure,13.9267,100.5868
-Grand Canal Don Mueang,Copper,Normal,13.9411,100.6077
+﻿name,resource,purity,rate,latitude,longitude
+Siam Paragon,Iron,Pure,120,13.7458,100.5344
+Central Rama 9,Coal,Normal,60,13.7585,100.566
+Srinakharinwirot University,Copper,Impure,30,13.7433,100.5663
+Singha Complex,Copper,Pure,120,13.7481,100.5646
+centralwOrld,Coal,Normal,60,13.7465,100.5391
+Benchakitti Park,Wood,Normal,60,13.7292,100.5586
+Lumphini Park,Wood,Pure,120,13.7314,100.5417
+Terminal 21 Asok,Iron,Normal,60,13.7379,100.5605
+Fortune Town,Iron,Impure,30,13.7580,100.5651
+Samyan Mitrtown,Coal,Impure,30,13.7337,100.5284
+CDG House,Iron,Pure,120,13.7030,100.5435
+The Mall Lifestore Tha Phra,Copper,Normal,60,13.7136,100.4800
+The Mall Lifestore Bangkae,Iron,Normal,60,13.7131,100.4081
+Baiyoke Tower II,Copper,Impure,30,13.754167,100.540556
+Statue of Liberty,Copper,Purest,300,40.6892,-74.0445
+Eiffel Tower,Iron,Purest,300,48.8584,2.2945
+Sao Ching Cha,Wood,Purest,300,13.7518,100.5013
+Colosseum,Coal,Purest,300,41.8902,12.4922
+Phraharuthai Donmuang School,Coal,Normal,60,13.9257,100.5884
+Don Mueang International Airport,Iron,Pure,120,13.9150,100.6055
+Rommani Thungsikan Park,Wood,Impure,30,13.9289,100.5682
+Bun Anan Market,Iron,Pure,120,13.9267,100.5868
+Grand Canal Don Mueang,Copper,Normal,60,13.9411,100.6077

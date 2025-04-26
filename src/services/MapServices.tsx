@@ -4,6 +4,7 @@ import resourceNodesLayer from "../layers/resourceNodes";
 import arcgisConfig from "../../config/arcgis.json";
 import esriConfig from "@arcgis/core/config";
 import config from "../../config/arcgis.json";
+import searchWidget from "../widget/SearchWidget";
 
 export default class MapService {
     private static instance: MapService | null = null;
@@ -25,6 +26,10 @@ export default class MapService {
             map: this.map,
             ...arcgisConfig.mapView,
         });
+
+        searchWidget.view = this.view;
+
+        this.view.ui.add(searchWidget, { position: "top-right" });
     }
 
     public getMap() {

@@ -11,6 +11,7 @@ import { ListItem } from "../List/List";
 import ResourceNodeImg from "../../assets/ResourceNodeImg";
 import MapService from "../../services/MapServices";
 import { SidebarAction } from "../../App";
+import searchWidget from "../../widget/SearchWidget";
 
 function isGraphicHit(
     viewHit: __esri.MapViewViewHit
@@ -126,6 +127,25 @@ function MapWindow(props: MapWindowProps) {
                 attributes,
             }: { attributes: ResourceNode & { __OBJECTID: number } } =
                 node.graphic;
+
+            const { __OBJECTID, name, resource, purity } = attributes;
+
+            dispatch({
+                type: "resource-click",
+                payload: {
+                    OBJECTID: __OBJECTID,
+                    name,
+                    resource,
+                    purity,
+                },
+            });
+        });
+
+        searchWidget.on("search-complete", (event) => {
+            const {
+                attributes,
+            }: { attributes: ResourceNode & { __OBJECTID: number } } =
+                event.results[0].results[0].feature;
 
             const { __OBJECTID, name, resource, purity } = attributes;
 

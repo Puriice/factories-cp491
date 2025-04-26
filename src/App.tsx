@@ -1,4 +1,4 @@
-import { JSX, Suspense, use, useReducer } from "react";
+import { JSX, Suspense, use, useEffect, useReducer, useState } from "react";
 import style from "./App.module.scss";
 import List, { ListItem } from "./components/List/List";
 import MapWindow from "./components/Map/Map";
@@ -7,6 +7,8 @@ import Loading from "./components/Loading";
 import { loadWorkerService } from "./services/GameWorkerService";
 import { loadInventoryService } from "./services/GameInventoryService";
 import DefaultSidebar from "./components/DefaultSidebar";
+import MapService from "./services/MapServices";
+import MapView from "@arcgis/core/views/MapView";
 
 function sidebarReducer(
     _state: SidebarState,
@@ -51,6 +53,14 @@ function AppRenderer() {
         element: <DefaultSidebar />,
     });
 
+    const [view, setView] = useState<MapView | null>(null);
+
+    useEffect(() => {
+        const mapService = new MapService();
+
+        setView(mapService.getMapView());
+    }, []);
+
     return (
         <div className={style.root}>
             <header className={style.header}></header>
@@ -60,7 +70,10 @@ function AppRenderer() {
                     {state.type != "default" ? (
                         <button
                             className={style.back__btn}
-                            onClick={() => dispatch({ type: "default" })}
+                            onClick={() => {
+                                view?.closePopup();
+                                dispatch({ type: "default" });
+                            }}
                         >
                             Back
                         </button>
