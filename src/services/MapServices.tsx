@@ -2,7 +2,6 @@ import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import resourceNodesLayer from "../layers/resourceNodes";
 import arcgisConfig from "../../config/arcgis.json";
-import esriConfig from "@arcgis/core/config";
 
 export default class MapService {
     private static instance: MapService | null = null;
@@ -11,9 +10,6 @@ export default class MapService {
 
     constructor() {
         if (MapService.instance != null) return MapService.instance;
-
-        esriConfig.apiKey =
-            "AAPTxy8BH1VEsoebNVZXo8HurNZ-ICH9Ibiwmmwlxup4Wa_LMfLMVZvyOnanQnldokVcD678x8l-c7LB9NSur64v85b53U77y0lgMtZowAPJ6nt6IPt4L6MkpFwAyiGntaWuVA_8cgVx8zf3B5k9Oh13Qk0XAwQz40-zmu5plSP4V7KyDsB-1qWx1V_N7nae09qMHAhjO7UkVIHIgkv33Ieaog7baCw740ksSV6wFopjAH8q_Be_hhUdnnMKstj6-xCpAT1_qI5ZhzZb";
 
         MapService.instance = this;
         this.map = new Map({

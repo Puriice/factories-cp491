@@ -8,7 +8,7 @@ import useWorker from "../../hook/useWorker";
 import useWorkerAssignment from "../../hook/useWorkerAssignment";
 
 function Inventory() {
-    const [worker] = useWorker();
+    const { worker } = useWorker();
     const { occupiedWorker } = useWorkerAssignment();
     const [inventory, deleteItem] = useInventory();
     console.log(worker);

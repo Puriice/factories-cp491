@@ -1,9 +1,11 @@
-import { JSX, useReducer } from "react";
+import { JSX, Suspense, use, useReducer } from "react";
 import style from "./App.module.scss";
 import List, { ListItem } from "./components/List/List";
 import MapWindow from "./components/Map/Map";
 import ResourceInfo, { ResourceDetail } from "./components/ResourceInfo";
 import Inventory from "./components/Inventory/inventory";
+import Loading from "./components/Loading";
+import { loadWorkerService } from "./services/GameWorkerService";
 
 function sidebarReducer(
     _state: SidebarState,
@@ -28,6 +30,20 @@ function sidebarReducer(
 }
 
 function App() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <AppLoader />
+        </Suspense>
+    );
+}
+
+function AppLoader() {
+    use(loadWorkerService);
+
+    return <AppRenderer />;
+}
+
+function AppRenderer() {
     const [state, dispatch] = useReducer(sidebarReducer, {
         type: "default",
         element: <Inventory />,

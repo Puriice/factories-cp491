@@ -1,153 +1,102 @@
-import { useEffect, useMemo, useState } from "react";
-import useUserId from "./useUserId";
-import { query } from "./useInventory";
-import coinLayer from "../layers/coinLayer";
-import Graphic from "@arcgis/core/Graphic";
+import { useState } from "react";
+import GameWorkerService from "../services/GameWorkerService";
 
 export type WorkerModificationFunction = (amount?: number) => Promise<boolean>;
 
-export interface WorkerAvaliableModificationFunction {
+export type UseWorkerReturn = {
+    worker: Coin;
     increaseWorker: WorkerModificationFunction;
     decreaseWorker: WorkerModificationFunction;
-}
-
-export interface WorkerTotalModificationFunction {
     increaseTotal: WorkerModificationFunction;
-}
-
-export type UseWorkerReturn = [
-    Coin,
-    WorkerAvaliableModificationFunction,
-    WorkerTotalModificationFunction
-];
-
-const workerCache: Coin | null = null;
+    updateWorker: () => void;
+};
 
 export default function useWorker(): UseWorkerReturn {
-    const kind = "Worker";
-    const userId = useUserId();
+    const workerService = new GameWorkerService();
 
-    const outFields = useMemo(
-        () => ["OBJECTID", "kind", "avaliable", "total"],
-        []
-    );
+    const [worker, setWorker] = useState<Coin>(workerService.getWorker());
 
-    const [worker, setWorker] = useState<Coin>({
-        OBJECTID: -999,
-        kind,
-        avaliable: 0,
-        total: 0,
-    });
+    async function increaseWorker(amount: number = 1) {
+        const oldValue = worker.avaliable;
 
-    useEffect(() => {
-        if (workerCache) {
-            setWorker(workerCache);
-            return;
-        }
+        setWorker((value) => {
+            return {
+                ...value,
+                avaliable: Math.min(value.total, value.avaliable + amount),
+            };
+        });
 
-        let isMounted = true;
+        const status = await workerService.increaseWorker(amount);
 
-        const loadCoin = async () => {
-            const coin = await query<Coin>(
-                userId,
-                coinLayer,
-                outFields,
-                `kind = '${kind}'`
-            );
+        if (status) return true;
 
-            if (coin.length == 0) {
-                const result = await coinLayer.applyEdits({
-                    addFeatures: [
-                        new Graphic({
-                            attributes: {
-                                kind,
-                                avaliable: 1,
-                                total: 1,
-                                owner: userId,
-                            },
-                        }),
-                    ],
-                });
+        setWorker((value) => {
+            return {
+                ...value,
+                avaliable: oldValue,
+            };
+        });
 
-                console.debug(result.addFeatureResults);
+        return false;
+    }
+    async function decreaseWorker(amount: number = 1) {
+        const oldValue = worker.avaliable;
 
-                return loadCoin();
-            }
+        setWorker((value) => {
+            return {
+                ...value,
+                avaliable: Math.max(0, value.avaliable - amount),
+            };
+        });
 
-            if (isMounted) {
-                setWorker(coin[0]);
-            }
-            if (coin.length > 1) {
-                await coinLayer.applyEdits({
-                    deleteFeatures: coin.slice(1).map((coin) => {
-                        return new Graphic({
-                            attributes: {
-                                OBJECTID: coin.OBJECTID,
-                            },
-                        });
-                    }),
-                });
-            }
-        };
+        const status = await workerService.decreaseWorker(amount);
 
-        loadCoin();
+        if (status) return true;
 
-        return () => {
-            isMounted = false;
-        };
-    }, [userId, outFields, kind]);
+        setWorker((value) => {
+            return {
+                ...value,
+                avaliable: oldValue,
+            };
+        });
 
-    function createModificationCoin(
-        modifyFunction: (amount: number) => Partial<Coin>
-    ) {
-        return async function (amount: number = 1) {
-            const targetWorker = modifyFunction(amount);
-            const result = await coinLayer.applyEdits({
-                updateFeatures: [
-                    new Graphic({
-                        attributes: {
-                            ...worker,
-                            ...targetWorker,
-                            owner: userId,
-                        },
-                    }),
-                ],
-            });
-
-            if (result.updateFeatureResults.some((r) => r.error !== null)) {
-                console.error(result.updateFeatureResults);
-
-                return false;
-            }
-
-            setWorker({
-                ...worker,
-                ...targetWorker,
-            });
-
-            return true;
-        };
+        return false;
     }
 
-    const increaseWorker = createModificationCoin((amount) => {
-        return {
-            avaliable: Math.min(worker.total, worker.avaliable + amount),
-        };
-    });
+    async function increaseTotal(amount: number = 1) {
+        const oldValue = amount;
+        setWorker((value) => {
+            return {
+                ...value,
+                total: value.total + amount,
+            };
+        });
 
-    const decreaseWorker = createModificationCoin((amount) => {
-        return {
-            avaliable: Math.max(0, worker.avaliable - amount),
-        };
-    });
+        const status = await workerService.increaseTotalWorker(amount);
 
-    const increaseTotal = createModificationCoin((amount) => {
-        return {
-            total: worker.total + amount,
-        };
-    });
+        if (status) return true;
 
-    return [worker, { increaseWorker, decreaseWorker }, { increaseTotal }];
+        setWorker((value) => {
+            return {
+                ...value,
+                total: oldValue,
+            };
+        });
+
+        return false;
+    }
+
+    function updateWorker() {
+        setWorker(workerService.getWorker());
+    }
+
+    return {
+        worker,
+        increaseWorker,
+        decreaseWorker,
+        increaseTotal,
+        updateWorker,
+    };
 }
 
 type CoinType = "Worker";

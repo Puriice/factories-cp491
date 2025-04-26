@@ -3,17 +3,25 @@ import { Coin, WorkerModificationFunction } from "../hook/useWorker";
 import { query } from "../hook/useInventory";
 import coinLayer from "../layers/coinLayer";
 import getUserId from "./getUserId";
+import workerAssignmentLayer from "../layers/workerAssignmentLayer";
+import { WorkerAssignment } from "../hook/useWorkerAssignment";
 
 export default class GameWorkerService {
     private static instance: GameWorkerService | null = null;
 
-    private OBJECTID = -999;
-    private avaliableWorker = 1;
-    private totalWorker = 1;
+    private worker: Coin = {
+        OBJECTID: -999,
+        avaliable: 1,
+        total: 1,
+        kind: "Worker",
+    };
+
+    private workerAssignments: WorkerAssignment[] = [];
 
     private userId!: string;
 
-    private isInitialized = false;
+    private workerLoadingStatus!: Promise<boolean>;
+    private workerAssignmentLoadingStatus!: Promise<boolean>;
 
     private increaseWorkerFn: WorkerModificationFunction | null = null;
     private decreaseWorkerFn: WorkerModificationFunction | null = null;
@@ -27,14 +35,11 @@ export default class GameWorkerService {
 
         this.userId = getUserId();
 
-        this.loadWorker().then(
-            (() => {
-                this.isInitialized = true;
-            }).bind(this)
-        );
+        this.workerLoadingStatus = this.loadWorker();
+        this.workerAssignmentLoadingStatus = this.loadWorkerAssignment();
     }
 
-    private async loadWorker() {
+    private async loadWorker(): Promise<boolean> {
         const outFields = ["OBJECTID", "kind", "avaliable", "total"];
         const coin = await query<Coin>(
             this.userId,
@@ -59,12 +64,10 @@ export default class GameWorkerService {
 
             console.debug(result.addFeatureResults);
 
-            return this.loadWorker;
+            return this.loadWorker();
         }
 
-        this.avaliableWorker = coin[0].avaliable;
-        this.totalWorker = coin[0].total;
-        this.OBJECTID = coin[0].OBJECTID;
+        this.worker = coin[0];
 
         if (coin.length > 1) {
             await coinLayer.applyEdits({
@@ -77,22 +80,45 @@ export default class GameWorkerService {
                 }),
             });
         }
+
+        return true;
+    }
+
+    private async loadWorkerAssignment(): Promise<boolean> {
+        const outFields = ["OBJECTID", "targetId", "targetName", "assignDate"];
+        const workers = await query<WorkerAssignment>(
+            this.userId,
+            workerAssignmentLayer,
+            outFields
+        );
+
+        this.workerAssignments = workers;
+
+        return true;
     }
 
     public isReady() {
-        return this.isInitialized;
+        return [this.workerLoadingStatus, this.workerAssignmentLoadingStatus];
+    }
+
+    public getWorker() {
+        return this.worker;
+    }
+
+    public getWorkerAssignement() {
+        return this.workerAssignments;
     }
 
     public getOBJECTID() {
-        return this.OBJECTID;
+        return this.worker.OBJECTID;
     }
 
     public getAvaliableWorker() {
-        return this.avaliableWorker;
+        return this.worker.avaliable;
     }
 
     public getTotalWorker() {
-        return this.totalWorker;
+        return this.worker.total;
     }
 
     private createModificationFunction(
@@ -100,10 +126,10 @@ export default class GameWorkerService {
     ) {
         return async (amount: number = 1) => {
             const coin: Coin = {
-                OBJECTID: this.OBJECTID,
+                OBJECTID: this.worker.OBJECTID,
                 kind: "Worker",
-                avaliable: this.avaliableWorker,
-                total: this.totalWorker,
+                avaliable: this.worker.avaliable,
+                total: this.worker.total,
             };
             const userId = this.userId;
 
@@ -120,76 +146,185 @@ export default class GameWorkerService {
                 ],
             });
 
-            if (result.updateFeatureResults.some((r) => r.error === null)) {
-                console.error(result.updateFeatureResults);
+            if (result.updateFeatureResults[0].error == null) return true;
 
-                return false;
-            }
+            console.error(result.updateFeatureResults);
 
-            return true;
+            return false;
         };
     }
 
-    public increaseWorker(amount: number) {
+    public async increaseWorker(amount: number) {
         if (this.increaseWorkerFn == null)
             this.increaseWorkerFn = this.createModificationFunction(
                 (amount) => {
                     return {
                         avaliable: Math.min(
-                            this.totalWorker,
-                            this.avaliableWorker + amount
+                            this.worker.total,
+                            this.worker.avaliable + amount
                         ),
                     };
                 }
             );
 
-        return this.increaseWorkerFn(amount).then((value) => {
-            if (!value) return value;
+        const oldValue = this.worker.avaliable;
 
-            this.avaliableWorker = Math.min(
-                this.totalWorker,
-                this.avaliableWorker + amount
-            );
+        this.worker.avaliable = Math.min(
+            this.worker.total,
+            this.worker.avaliable + amount
+        );
 
-            return true;
-        });
+        const value = await this.increaseWorkerFn(amount);
+
+        if (value) return true;
+
+        this.worker.avaliable = oldValue;
+
+        return false;
     }
 
-    public decreaseWorker(amount: number) {
+    public async decreaseWorker(amount: number) {
         if (this.decreaseWorkerFn == null)
             this.decreaseWorkerFn = this.createModificationFunction(
                 (amount) => {
                     return {
-                        avaliable: Math.max(0, this.avaliableWorker - amount),
+                        avaliable: Math.max(0, this.worker.avaliable - amount),
                     };
                 }
             );
 
-        return this.decreaseWorkerFn(amount).then((value) => {
-            if (!value) return value;
+        const oldValue = this.worker.avaliable;
 
-            this.avaliableWorker = Math.max(0, this.avaliableWorker - amount);
+        this.worker.avaliable = Math.max(0, this.worker.avaliable - amount);
 
-            return true;
-        });
+        const value = await this.decreaseWorkerFn(amount);
+
+        if (value) return true;
+
+        this.worker.avaliable = oldValue;
+
+        return false;
     }
 
-    public increaseTotalWorker(amount: number) {
+    public async increaseTotalWorker(amount: number) {
         if (this.increaseTotalWorkerFn == null)
             this.increaseTotalWorkerFn = this.createModificationFunction(
                 (amount) => {
                     return {
-                        total: this.totalWorker + amount,
+                        total: this.worker.total + amount,
                     };
                 }
             );
 
-        return this.increaseTotalWorkerFn(amount).then((value) => {
-            if (!value) return value;
+        const oldValue = this.worker.total;
 
-            this.totalWorker = this.totalWorker + amount;
+        this.worker.total = this.worker.total + amount;
+
+        const value = await this.increaseTotalWorkerFn(amount);
+
+        if (value) return true;
+
+        this.worker.total = oldValue;
+
+        return false;
+    }
+
+    public async assignWorker(resourceId: number, resourceName: string) {
+        const oldValue = [...this.workerAssignments];
+
+        const payload = {
+            targetId: resourceId,
+            targetName: resourceName,
+            assignDate: new Date(),
+            owner: this.userId,
+        };
+        const tempOBJECTIDArr = new Uint32Array(1);
+
+        crypto.getRandomValues(tempOBJECTIDArr);
+
+        const tempOBJECTID = Number(tempOBJECTIDArr);
+
+        this.workerAssignments.push({
+            ...payload,
+            OBJECTID: tempOBJECTID,
+        });
+
+        this.decreaseWorker(1);
+
+        const assignWorkerResult = await workerAssignmentLayer.applyEdits({
+            addFeatures: [
+                new Graphic({
+                    attributes: payload,
+                }),
+            ],
+        });
+
+        if (assignWorkerResult.addFeatureResults[0].error == null) {
+            const index = this.workerAssignments.findIndex(
+                (assignment) => assignment.OBJECTID == tempOBJECTID
+            );
+
+            this.workerAssignments[index].OBJECTID =
+                assignWorkerResult.addFeatureResults[0].objectId!;
 
             return true;
+        }
+
+        console.error(assignWorkerResult.addFeatureResults);
+
+        this.increaseWorker(1);
+
+        this.workerAssignments = oldValue;
+
+        return false;
+    }
+
+    public async unassignWorker(resourceId: number, resourceName: string) {
+        const targetWorkAssignment = this.workerAssignments.find(
+            (assignment) =>
+                assignment.targetId === resourceId &&
+                assignment.targetName === resourceName
+        );
+
+        if (!targetWorkAssignment) return false;
+
+        const oldValue = [...this.workerAssignments];
+
+        this.increaseWorker(1);
+
+        this.workerAssignments = this.workerAssignments.filter(
+            (assignment) => assignment.OBJECTID != targetWorkAssignment.OBJECTID
+        );
+
+        const unassignWorkerResult = await workerAssignmentLayer.applyEdits({
+            deleteFeatures: [
+                new Graphic({
+                    attributes: {
+                        OBJECTID: targetWorkAssignment?.OBJECTID,
+                    },
+                }),
+            ],
         });
+
+        if (unassignWorkerResult.deleteFeatureResults[0].error == null)
+            return true;
+
+        console.log(unassignWorkerResult.deleteFeatureResults);
+
+        this.decreaseWorker(1);
+
+        this.workerAssignments = oldValue;
+
+        return false;
     }
 }
+
+const loadWorkerService = new Promise((res) => {
+    const workerService = new GameWorkerService();
+
+    Promise.all(workerService.isReady()).then((value) => {
+        if (value.every((value) => value)) res(workerService);
+    });
+});
+
+export { loadWorkerService };

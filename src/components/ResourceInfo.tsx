@@ -8,7 +8,7 @@ import useWorkerAssignment from "../hook/useWorkerAssignment";
 import useWorker from "../hook/useWorker";
 
 function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
-    const [worker] = useWorker();
+    const { worker } = useWorker();
     const { occupiedWorker, assignWorker, unassignWorker, isReserved } =
         useWorkerAssignment();
     const { info } = props;
