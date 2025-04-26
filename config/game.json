@@ -5,6 +5,7 @@
 		"Normal": 60,
 		"Impure": 30
 	},
+	"maximumNodeProduces": 100,
 	"inventorySize": 64,
 	"recipes": []
 }

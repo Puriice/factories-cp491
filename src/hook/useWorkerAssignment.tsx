@@ -7,6 +7,8 @@ export type AssignWorkerFunction = (
     resourceName: string
 ) => Promise<boolean>;
 
+export type ReassignWorkerFunction = (objectId: number) => Promise<boolean>;
+
 export type UnassignWorkerFunction = (
     resourceId: number,
     resourceName: string
@@ -16,11 +18,12 @@ export type CheckReservedWorker = (
     occupiedWorkers: WorkerAssignment[],
     resourceId: number,
     resourceName: string
-) => boolean;
+) => WorkerAssignment | undefined;
 
 export interface AssignmentWorkerFunctions {
     occupiedWorker: WorkerAssignment[];
     assignWorker: AssignWorkerFunction;
+    reassignWorker: ReassignWorkerFunction;
     unassignWorker: UnassignWorkerFunction;
     isReserved: CheckReservedWorker;
 }
@@ -38,7 +41,7 @@ export default function useWorkerAssignment(): AssignmentWorkerFunctions {
         const payload = {
             targetId: resourceId,
             targetName: resourceName,
-            assignDate: new Date(),
+            assignDate: new Date().getTime(),
             owner: userId,
         };
         const tempOBJECTIDArr = new Uint32Array(1);
@@ -61,6 +64,25 @@ export default function useWorkerAssignment(): AssignmentWorkerFunctions {
             resourceId,
             resourceName
         );
+
+        setAssignedWorker(workerService.getWorkerAssignement());
+
+        return status;
+    }
+
+    async function reassignWorker(objectId: number) {
+        setAssignedWorker((value) => {
+            return value.map((assignment) => {
+                if (assignment.OBJECTID != objectId) return assignment;
+
+                return {
+                    ...assignment,
+                    assignDate: Date.now(),
+                };
+            });
+        });
+
+        const status = await workerService.reassignWorker(objectId);
 
         setAssignedWorker(workerService.getWorkerAssignement());
 
@@ -91,12 +113,11 @@ export default function useWorkerAssignment(): AssignmentWorkerFunctions {
         resourceId: number,
         resourceName: string
     ) {
-        const target =
-            occupiedWorkers.findIndex(
-                (assignment) =>
-                    assignment.targetId === resourceId &&
-                    assignment.targetName === resourceName
-            ) != -1;
+        const target = occupiedWorkers.find(
+            (assignment) =>
+                assignment.targetId === resourceId &&
+                assignment.targetName === resourceName
+        );
 
         return target;
     }
@@ -104,6 +125,7 @@ export default function useWorkerAssignment(): AssignmentWorkerFunctions {
     return {
         occupiedWorker,
         assignWorker,
+        reassignWorker,
         unassignWorker,
         isReserved,
     };
@@ -113,5 +135,5 @@ export interface WorkerAssignment {
     OBJECTID: number;
     targetId: number;
     targetName: string;
-    assignDate: Date;
+    assignDate: number;
 }

@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { Purities, ResourceName } from "../types/resources";
 import style from "./scss/ResourceInfo.module.scss";
 import ItemImages from "../assets/ItemImages";
@@ -6,22 +6,67 @@ import gameConfig from "../../config/game.json";
 import Button from "./Button";
 import useWorkerAssignment from "../hook/useWorkerAssignment";
 import useWorker from "../hook/useWorker";
+import useInventory from "../hook/useInventory";
 
 function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
+    const { appendItem } = useInventory();
     const { worker } = useWorker();
-    const { occupiedWorker, assignWorker, unassignWorker, isReserved } =
-        useWorkerAssignment();
+    const {
+        occupiedWorker,
+        assignWorker,
+        reassignWorker,
+        unassignWorker,
+        isReserved,
+    } = useWorkerAssignment();
     const { info } = props;
 
     const isReserve = isReserved(occupiedWorker, info.OBJECTID, info.name);
 
-    console.log({ isReserve });
+    function calculateCollectedResource(
+        startTimestamp: number,
+        resourcePerMinute: number
+    ) {
+        const currentTimestamp = Date.now();
+        const elapsedMilliseconds = currentTimestamp - startTimestamp;
+        const elapsedMinutes = elapsedMilliseconds / 60000;
+        const resourcesGenerated = elapsedMinutes * resourcePerMinute;
+
+        return Math.min(
+            Math.floor(resourcesGenerated),
+            gameConfig.maximumNodeProduces
+        );
+    }
+
+    const [nResource, setNResource] = useState(0);
+
+    useEffect(() => {
+        if (!isReserve) return;
+
+        const resourceloop = setInterval(() => {
+            setNResource(
+                calculateCollectedResource(
+                    isReserve.assignDate,
+                    gameConfig.purities[info.purity]
+                )
+            );
+        }, 1 / (gameConfig.purities[info.purity] ?? 30));
+
+        return () => {
+            clearInterval(resourceloop);
+        };
+    }, [info.purity, isReserve]);
 
     return (
         <div className={style.root}>
             <div className={style.center}>
                 <h1 className={style.title}>{info.name}</h1>
                 <div className={style.name__box}>
+                    {nResource > 0 ? (
+                        <div className={style.count}>{nResource}</div>
+                    ) : (
+                        <></>
+                    )}
+
                     <img
                         className={style.icon}
                         src={ItemImages[info.resource]}
@@ -42,7 +87,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
                 <div className={style.button__list}>
                     <Button
                         className={style.button}
-                        disabled={worker.avaliable <= 0 || isReserve}
+                        disabled={worker.avaliable <= 0 || !!isReserve}
                         onClick={() => assignWorker(info.OBJECTID, info.name)}
                     >
                         Assign Worker ({worker.avaliable} / {worker.total})
@@ -51,13 +96,22 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
                         <>
                             <Button
                                 className={style.button}
-                                onClick={() =>
-                                    unassignWorker(info.OBJECTID, info.name)
-                                }
+                                onClick={() => {
+                                    appendItem(info.resource, nResource);
+                                    setNResource(0);
+                                    unassignWorker(info.OBJECTID, info.name);
+                                }}
                             >
                                 Unassign Worker
                             </Button>
-                            <Button className={style.button}>
+                            <Button
+                                className={style.button}
+                                onClick={() => {
+                                    appendItem(info.resource, nResource);
+                                    setNResource(0);
+                                    reassignWorker(isReserve.OBJECTID);
+                                }}
+                            >
                                 Collect Resource
                             </Button>
                         </>

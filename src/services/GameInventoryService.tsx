@@ -87,7 +87,10 @@ export default class GameInventoryService {
         const result = await inventoryLayer.applyEdits({
             addFeatures: [
                 new Graphic({
-                    attributes: payload,
+                    attributes: {
+                        ...payload,
+                        owner: this.userId,
+                    },
                 }),
             ],
         });

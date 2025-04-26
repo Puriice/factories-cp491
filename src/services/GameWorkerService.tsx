@@ -235,7 +235,7 @@ export default class GameWorkerService {
         const payload = {
             targetId: resourceId,
             targetName: resourceName,
-            assignDate: new Date(),
+            assignDate: new Date().getTime(),
             owner: this.userId,
         };
         const tempOBJECTIDArr = new Uint32Array(1);
@@ -278,6 +278,43 @@ export default class GameWorkerService {
         console.error(assignWorkerResult.addFeatureResults);
 
         this.increaseWorker(1);
+
+        this.workerAssignments = oldValue;
+
+        return false;
+    }
+
+    public async reassignWorker(objectId: number) {
+        const targetIndex = this.workerAssignments.findIndex(
+            (assignment) => assignment.OBJECTID == objectId
+        );
+
+        if (targetIndex == -1) return false;
+
+        const oldValue = [...this.workerAssignments];
+
+        const now = Date.now();
+
+        this.workerAssignments[targetIndex].assignDate = now;
+
+        const target = this.workerAssignments[targetIndex];
+
+        const reassignResult = await workerAssignmentLayer.applyEdits({
+            updateFeatures: [
+                new Graphic({
+                    attributes: {
+                        OBJECTID: target.OBJECTID,
+                        targetName: target.targetName,
+                        targetId: target.targetId,
+                        assignDate: now,
+                    } satisfies WorkerAssignment,
+                }),
+            ],
+        });
+
+        if (reassignResult.updateFeatureResults[0].error == null) return true;
+
+        console.error(reassignResult.updateFeatureResults);
 
         this.workerAssignments = oldValue;
 
