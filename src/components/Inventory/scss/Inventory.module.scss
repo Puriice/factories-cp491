@@ -3,13 +3,14 @@
 .root {
 	display: flex;
 	flex-direction: column;
+	gap: 8px;
 }
 
 .coins {
 	display: flex;
 	justify-content: space-evenly;
 
-	padding: 0 3rem 1rem;
+	padding: 0 3rem;
 }
 
 .coin {
@@ -83,6 +84,25 @@
 	font-size: 20px;
 }
 
+.search__box {
+	padding: 0 3.5rem;
+}
+
+$border-radius: 6px;
+
+.search__input {
+	width: 100%;
+	color: #eee;
+	background: #333;
+	border: none;
+	padding: .8rem 1rem;
+	border-radius: $border-radius;
+
+	&:focus {
+		outline: none;
+	}
+}
+
 .items {
 	display: grid;
 	height: 100%;
@@ -98,7 +118,6 @@
 	}
 }
 
-$border-radius: 6px;
 
 .item {
 	width: 64px;

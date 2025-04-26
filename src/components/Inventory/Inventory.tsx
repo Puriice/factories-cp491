@@ -14,15 +14,50 @@ function Inventory() {
 
     const [checked, setChecked] = useState("");
 
-    const items = inventory.concat(
+    const defaultItems = inventory.concat(
         Array(gameConfig.inventorySize - inventory.length).fill(null)
     );
+
+    const [items, setItems] = useState(defaultItems);
+    const [search, setSearchValue] = useState("");
 
     const randomValue = () => {
         const array = new Uint32Array(10);
         globalThis.crypto.getRandomValues(array);
 
         return array.join();
+    };
+
+    const onChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+        const { value } = event.target;
+        setSearchValue(value);
+
+        if (value == "") {
+            setItems(defaultItems);
+            return;
+        }
+
+        const loweredSearch = value.toLowerCase().trim();
+
+        const filteredItems = inventory.filter((item) =>
+            item.name.toLowerCase().includes(loweredSearch)
+        );
+
+        const isRepeated =
+            inventory.length == filteredItems.length &&
+            inventory.every((value, i) => {
+                return Object.is(value, filteredItems[i]);
+            });
+
+        if (isRepeated) return;
+
+        setItems(() => {
+            return filteredItems.concat(
+                Array(gameConfig.inventorySize - filteredItems.length).fill(
+                    null
+                )
+            );
+        });
     };
 
     return (
@@ -51,6 +86,15 @@ function Inventory() {
                         /{worker.total}
                     </div>
                 </div>
+            </div>
+            <div className={style.search__box}>
+                <input
+                    type="text"
+                    placeholder="Search Inventory"
+                    className={style.search__input}
+                    value={search}
+                    onChange={onChange}
+                />
             </div>
             <div className={style.items}>
                 {items.map((item, index) => {
