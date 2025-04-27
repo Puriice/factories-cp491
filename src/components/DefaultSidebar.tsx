@@ -8,7 +8,8 @@ import Goal from "./Goal/Goal";
 import useInventory from "../hook/useInventory";
 
 function DefaultSidebar() {
-    const { inventory, deleteItem, popItem, craftItem } = useInventory();
+    const { inventory, deleteItem, popItem, craftItem, craftingStatus } =
+        useInventory();
     const tabs: Tab[] = [
         {
             key: "inventory",
@@ -31,6 +32,7 @@ function DefaultSidebar() {
                         inventory,
                         popItem,
                         craftItem,
+                        craftingStatus,
                     }}
                 />
             ),

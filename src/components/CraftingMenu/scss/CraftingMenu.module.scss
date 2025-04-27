@@ -12,6 +12,8 @@
 	gap: 4px;
 	border: 1px solid #d0d0d0;
 	padding: 4px;
+	height: 100%;
+	overflow-y: scroll;
 }
 
 $border-radius: 4px;
@@ -22,6 +24,8 @@ $border-radius: 4px;
 	gap: 4px;
 	background: #fff;
 	border-radius: $border-radius;
+	cursor: pointer;
+	user-select: none;
 }
 
 .list__img {

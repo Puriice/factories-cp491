@@ -35,6 +35,7 @@ export type useInventoryReturns = {
     appendItem: AppendItem;
     popItem: PopItem;
     craftItem: CraftItem;
+    craftingStatus: boolean;
 };
 
 export default function useIntentory(): useInventoryReturns {
@@ -43,6 +44,8 @@ export default function useIntentory(): useInventoryReturns {
     const [inventory, setInventory] = useState<Item[]>(
         inventoryService.getItems()
     );
+
+    const [craftingStatus, setCraftingStatus] = useState<boolean>(false);
 
     async function deleteItem(objectId: number) {
         setInventory((value) => {
@@ -53,7 +56,9 @@ export default function useIntentory(): useInventoryReturns {
 
         if (status) return true;
 
-        setInventory(inventoryService.getItems());
+        setInventory(() => {
+            return [...inventoryService.getItems()];
+        });
 
         return false;
     }
@@ -73,7 +78,9 @@ export default function useIntentory(): useInventoryReturns {
 
         const result = await inventoryService.appendItem(name, n);
 
-        setInventory(inventoryService.getItems());
+        setInventory(() => {
+            return [...inventoryService.getItems()];
+        });
 
         return result;
     }
@@ -91,20 +98,31 @@ export default function useIntentory(): useInventoryReturns {
 
         const result = await inventoryService.popItem(name, n);
 
-        setInventory(inventoryService.getItems());
+        setInventory(() => {
+            return [...inventoryService.getItems()];
+        });
 
         return result;
     }
 
     async function craftItem(recipe: Recipe) {
+        setCraftingStatus(true);
         recipe.inputs.forEach(async (input) => {
             await popItem(input.name, input.n);
         });
 
         await appendItem(recipe.produce, recipe.n);
 
+        setCraftingStatus(false);
         return true;
     }
 
-    return { inventory, deleteItem, appendItem, popItem, craftItem };
+    return {
+        inventory,
+        deleteItem,
+        appendItem,
+        popItem,
+        craftItem,
+        craftingStatus,
+    };
 }

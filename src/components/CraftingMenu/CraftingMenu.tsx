@@ -16,7 +16,7 @@ function CraftingMenu(props: CraftingMenuProps) {
     const [clickedCount, setClickedCount] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
 
-    const { inventory, craftItem } = props.inventory;
+    const { inventory, craftItem, craftingStatus } = props.inventory;
 
     const totalAvaliable = useMemo(() => {
         return inventory.reduce((prev, curr) => {
@@ -33,6 +33,14 @@ function CraftingMenu(props: CraftingMenuProps) {
 
     useEffect(() => {
         if (!isMouseDown) return;
+        if (
+            !selectedRecipe.inputs.every(
+                (input) => totalAvaliable[input.name] > input.n
+            )
+        )
+            return () => setIsMouseDown(false);
+
+        if (craftingStatus) return setIsMouseDown(false);
 
         const clickInterval = setInterval(() => {
             setClickedCount((count) => {
@@ -43,14 +51,27 @@ function CraftingMenu(props: CraftingMenuProps) {
         return () => {
             clearInterval(clickInterval);
         };
-    }, [isMouseDown, selectedRecipe.clicks]);
+    }, [
+        isMouseDown,
+        selectedRecipe.clicks,
+        selectedRecipe.inputs,
+        totalAvaliable,
+        craftingStatus,
+    ]);
 
     useEffect(() => {
         if (clickedCount != selectedRecipe.clicks) return;
+        if (craftingStatus) return;
 
         craftItem(selectedRecipe);
         setClickedCount(0);
-    }, [clickedCount, craftItem, selectedRecipe, selectedRecipe.clicks]);
+    }, [
+        clickedCount,
+        craftItem,
+        craftingStatus,
+        selectedRecipe,
+        selectedRecipe.clicks,
+    ]);
 
     return (
         <div className={style.root}>
@@ -101,6 +122,11 @@ function CraftingMenu(props: CraftingMenuProps) {
                     className={style.craft__button}
                     onMouseDown={() => setIsMouseDown(true)}
                     onMouseUp={() => setIsMouseDown(false)}
+                    disabled={
+                        !selectedRecipe.inputs.every(
+                            (input) => totalAvaliable[input.name] > input.n
+                        ) || craftingStatus
+                    }
                 >
                     Craft
                 </Button>
@@ -116,5 +142,6 @@ export interface CraftingMenuProps {
         inventory: InventoryList;
         popItem: PopItem;
         craftItem: CraftItem;
+        craftingStatus: boolean;
     };
 }

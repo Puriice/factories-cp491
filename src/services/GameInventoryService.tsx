@@ -148,6 +148,8 @@ export default class GameInventoryService {
     }
 
     public async appendItem(name: string, n: number) {
+        console.log({ name, n });
+
         const oldItems = [...this.items];
 
         const { items, modifiedItems, appendedItems, appendedObjectId } =
@@ -155,20 +157,24 @@ export default class GameInventoryService {
 
         this.items = items;
 
+        console.log({ modifiedItems });
+
         if (modifiedItems.length > 0) {
             const result = await inventoryLayer.applyEdits({
                 updateFeatures: modifiedItems.map((item) => {
                     return new Graphic({
                         attributes: {
                             ...item,
-                            owner: this.userId,
                         },
                     });
                 }),
             });
 
             if (result.updateFeatureResults.some((res) => res.error != null)) {
-                console.error(result.updateFeatureResults);
+                console.error({
+                    modifiedItems,
+                    result: result.updateFeatureResults,
+                });
 
                 this.items = oldItems;
 
