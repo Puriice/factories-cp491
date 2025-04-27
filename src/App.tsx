@@ -9,6 +9,7 @@ import { loadInventoryService } from "./services/GameInventoryService";
 import DefaultSidebar from "./components/DefaultSidebar";
 import MapService from "./services/MapServices";
 import MapView from "@arcgis/core/views/MapView";
+import { loadGoalService } from "./services/GameGoalService";
 
 function sidebarReducer(
     _state: SidebarState,
@@ -43,6 +44,7 @@ function App() {
 function AppLoader() {
     use(loadWorkerService);
     use(loadInventoryService);
+    use(loadGoalService);
 
     return <AppRenderer />;
 }

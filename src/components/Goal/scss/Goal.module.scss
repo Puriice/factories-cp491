@@ -1,3 +1,75 @@
+@use '../../../assets/scss/color' as *;
+@use 'sass:color';
+
 .root {
 	height: 100%;
+	display: grid;
+	grid-template-areas: "lists" "button";
+	grid-template-rows: auto min-content;
+}
+
+.goal__list {
+	grid-area: "lists";
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.item {
+	display: flex;
+	align-items: center;
+	background: #fff;
+	height: 60px;
+
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.icon__box {
+	width: 60px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+}
+
+.count {
+	font-size: 12px;
+}
+
+.icon {
+	width: 60px;
+}
+
+.item__info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	padding-right: 8px;
+
+	position: relative;
+}
+
+.item__name {
+	padding-left: 8px;
+}
+
+.item__name,
+.item__number {
+	z-index: 3;
+}
+
+.progress__bar {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: var(--percent);
+	background: color.adjust($purple, $lightness: 20%);
+}
+
+.submit__button {
+	grid-area: button;
 }

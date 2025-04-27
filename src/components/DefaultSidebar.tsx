@@ -40,7 +40,14 @@ function DefaultSidebar() {
         {
             key: "goal",
             icon: GoalIcon,
-            tab: <Goal />,
+            tab: (
+                <Goal
+                    inventory={{
+                        inventory,
+                        popItem,
+                    }}
+                />
+            ),
         },
     ];
     return <TabContainer tabs={tabs} default="inventory" />;

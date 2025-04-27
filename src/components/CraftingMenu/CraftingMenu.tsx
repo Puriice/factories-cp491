@@ -35,7 +35,7 @@ function CraftingMenu(props: CraftingMenuProps) {
         if (!isMouseDown) return;
         if (
             !selectedRecipe.inputs.every(
-                (input) => totalAvaliable[input.name] > input.n
+                (input) => totalAvaliable[input.name] >= input.n
             )
         )
             return () => setIsMouseDown(false);
@@ -124,7 +124,7 @@ function CraftingMenu(props: CraftingMenuProps) {
                     onMouseUp={() => setIsMouseDown(false)}
                     disabled={
                         !selectedRecipe.inputs.every(
-                            (input) => totalAvaliable[input.name] > input.n
+                            (input) => totalAvaliable[input.name] >= input.n
                         ) || craftingStatus
                     }
                 >

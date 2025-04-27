@@ -6,5 +6,19 @@
 		"Impure": 30
 	},
 	"maxStack": 100,
-	"inventorySize": 64
+	"inventorySize": 64,
+	"goals": [
+		[
+			{
+				"name": "Calculator",
+				"n": 20
+			}
+		],
+		[
+			{
+				"name": "Calculator",
+				"n": 50
+			}
+		]
+	]
 }
