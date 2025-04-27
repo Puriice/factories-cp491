@@ -3,7 +3,6 @@ import MapView from "@arcgis/core/views/MapView";
 import resourceNodesLayer from "../layers/resourceNodes";
 import arcgisConfig from "../../config/arcgis.json";
 import esriConfig from "@arcgis/core/config";
-import config from "../../config/arcgis.json";
 import searchWidget from "../widget/SearchWidget";
 
 export default class MapService {
@@ -14,7 +13,7 @@ export default class MapService {
     constructor() {
         if (MapService.instance != null) return MapService.instance;
 
-        esriConfig.apiKey = config.apiKey;
+        esriConfig.apiKey = import.meta.env.VITE_API_KEY;
 
         MapService.instance = this;
         this.map = new Map({

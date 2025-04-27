@@ -1,5 +1,7 @@
+import style from "./scss/Goal.module.scss";
+
 function Goal() {
-    return <div>Goal</div>;
+    return <div className={style.root}>Goal</div>;
 }
 
 export default Goal;
