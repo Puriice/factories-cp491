@@ -4,6 +4,7 @@ import inventoryLayer from "../layers/inventroyLayer";
 import getUserId from "./getUserId";
 import MissingTexture from "../assets/img/missingTexture.png";
 import ItemImages from "../assets/ItemImages";
+import gameConfig from "../../config/game.json";
 
 export default class GameInventoryService {
     private static instance: GameInventoryService | null = null;
@@ -63,54 +64,155 @@ export default class GameInventoryService {
         return false;
     }
 
+    public getOptimisticAppendItem(items: Item[], name: string, n: number) {
+        const _items = [
+            ...items.map((item) => {
+                return {
+                    ...item,
+                };
+            }),
+        ];
+
+        const relatedItems = _items.filter((item) => item.name == name);
+
+        const modifiedItems: Item[] = [];
+        const appendedItems: Omit<Item, "OBJECTID">[] = [];
+        const appendedObjectId: number[] = [];
+
+        relatedItems.forEach((item) => {
+            if (item.n == gameConfig.maxStack) return;
+            if (n == 0) return;
+
+            const diff = gameConfig.maxStack - item.n;
+
+            modifiedItems.push(item);
+
+            if (n <= diff) {
+                console.log({
+                    modify: item,
+                    before: item.n,
+                    after: item.n + n,
+                    n,
+                });
+
+                item.n += n;
+                n = 0;
+            } else {
+                item.n = gameConfig.maxStack;
+                n -= diff;
+            }
+        });
+
+        // remainder to append
+        if (n > 0) {
+            for (let i = n; i > 0; i -= 100) {
+                const tempOBJECTIDArr = new Uint32Array(1);
+
+                crypto.getRandomValues(tempOBJECTIDArr);
+
+                const tempOBJECTID = Number(tempOBJECTIDArr);
+
+                appendedObjectId.push(tempOBJECTID);
+
+                if (i > gameConfig.maxStack) {
+                    const payload = {
+                        name,
+                        n: gameConfig.maxStack,
+                        icon: ItemImages[name] ?? MissingTexture,
+                    };
+
+                    _items.push({
+                        ...payload,
+                        OBJECTID: tempOBJECTID,
+                    });
+
+                    appendedItems.push(payload);
+
+                    continue;
+                }
+
+                const payload = {
+                    name,
+                    n: i,
+                    icon: ItemImages[name] ?? MissingTexture,
+                };
+
+                _items.push({
+                    ...payload,
+                    OBJECTID: tempOBJECTID,
+                });
+
+                appendedItems.push(payload);
+            }
+        }
+
+        return {
+            items: _items,
+            modifiedItems,
+            appendedItems,
+            appendedObjectId,
+        };
+    }
+
     public async appendItem(name: string, n: number) {
         const oldItems = [...this.items];
 
-        const tempOBJECTIDArr = new Uint32Array(1);
+        const { items, modifiedItems, appendedItems, appendedObjectId } =
+            this.getOptimisticAppendItem(this.items, name, n);
 
-        crypto.getRandomValues(tempOBJECTIDArr);
+        this.items = items;
 
-        const tempOBJECTID = Number(tempOBJECTIDArr);
-        const payload: Omit<Item, "OBJECTID"> = {
-            name,
-            n,
-            icon: ItemImages[name] ?? MissingTexture,
-        };
-
-        this.items.push({
-            ...payload,
-            OBJECTID: tempOBJECTID,
-        });
-
-        const result = await inventoryLayer.applyEdits({
-            addFeatures: [
-                new Graphic({
-                    attributes: {
-                        ...payload,
-                        owner: this.userId,
-                    },
+        if (modifiedItems.length > 0) {
+            const result = await inventoryLayer.applyEdits({
+                updateFeatures: modifiedItems.map((item) => {
+                    return new Graphic({
+                        attributes: {
+                            ...item,
+                            owner: this.userId,
+                        },
+                    });
                 }),
-            ],
-        });
+            });
 
-        if (result.addFeatureResults[0].error == null) {
-            const itemIndex = this.items.findIndex(
-                (item) => item.OBJECTID == tempOBJECTID
-            );
+            if (result.updateFeatureResults.some((res) => res.error != null)) {
+                console.error(result.updateFeatureResults);
 
-            if (itemIndex == -1) return true;
+                this.items = oldItems;
 
-            this.items[itemIndex].OBJECTID =
-                result.addFeatureResults[0].objectId!;
-
-            return true;
+                return false;
+            }
         }
 
-        console.error(result.addFeatureResults);
+        if (appendedItems.length > 0) {
+            const result = await inventoryLayer.applyEdits({
+                addFeatures: appendedItems.map((item) => {
+                    return new Graphic({
+                        attributes: {
+                            ...item,
+                            owner: this.userId,
+                        },
+                    });
+                }),
+            });
 
-        this.items = oldItems;
+            if (result.addFeatureResults.some((res) => res.error != null)) {
+                console.error(result.addFeatureResults);
 
-        return false;
+                this.items = oldItems;
+
+                return false;
+            }
+
+            const appeneded = this.items.filter((item) =>
+                appendedObjectId.includes(item.OBJECTID)
+            );
+
+            result.addFeatureResults.forEach((result, index) => {
+                appeneded[index].OBJECTID = result.objectId!;
+            });
+        }
+
+        return true;
     }
 }
 

@@ -82,7 +82,9 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
                     <Button
                         className={style.button}
                         disabled={worker.avaliable <= 0 || !!isReserve}
-                        onClick={() => assignWorker(info.OBJECTID, info.name)}
+                        onClick={() => {
+                            assignWorker(info.OBJECTID, info.name);
+                        }}
                     >
                         Assign Worker ({worker.avaliable} / {worker.total})
                     </Button>

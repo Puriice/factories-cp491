@@ -1,8 +1,6 @@
 import { useState } from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GameInventoryService, { Item } from "../services/GameInventoryService";
-import ItemImages from "../assets/ItemImages";
-import MissingTexture from "../assets/img/missingTexture.png";
 import gameConfig from "../../config/game.json";
 
 export async function query<R>(
@@ -58,22 +56,14 @@ export default function useIntentory(): useInventoryReturns {
     async function appendItem(name: string, n: number) {
         if (inventory.length >= gameConfig.inventorySize) return false;
 
-        const tempOBJECTIDArr = new Uint32Array(1);
-
-        crypto.getRandomValues(tempOBJECTIDArr);
-
-        const tempOBJECTID = Number(tempOBJECTIDArr);
-
         setInventory((value) => {
-            return [
-                ...value,
-                {
-                    name,
-                    n,
-                    icon: ItemImages[name] ?? MissingTexture,
-                    OBJECTID: tempOBJECTID,
-                },
-            ];
+            const { items } = inventoryService.getOptimisticAppendItem(
+                value,
+                name,
+                n
+            );
+
+            return [...items];
         });
 
         const result = await inventoryService.appendItem(name, n);

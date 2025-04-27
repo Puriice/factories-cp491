@@ -50,6 +50,7 @@ function CraftingMenu() {
                 {recipes.map((recipe) => {
                     return (
                         <CraftingListItem
+                            key={recipe.produce}
                             name={recipe.produce}
                             icon={recipe.icon}
                             onClick={() => {
@@ -74,6 +75,7 @@ function CraftingMenu() {
                         {selectedRecipe.inputs.map((input) => {
                             return (
                                 <CraftingInputItem
+                                    key={input.name}
                                     name={input.name}
                                     icon={input.icon}
                                     n={input.n}

@@ -23,13 +23,14 @@ function TabContainer(props: TabContainerProps) {
         <div className={style.root}>
             <Carousel index={index}>
                 {props.tabs.map((tab) => {
-                    return <CarouselItem>{tab.tab}</CarouselItem>;
+                    return <CarouselItem key={tab.key}>{tab.tab}</CarouselItem>;
                 })}
             </Carousel>
             <div className={style.button__list}>
                 {props.tabs.map((tab, i) => {
                     return (
                         <TabButton
+                            key={tab.key}
                             button={tab}
                             onClick={() => {
                                 setIndex(travelsalIndex[tab.key]);
