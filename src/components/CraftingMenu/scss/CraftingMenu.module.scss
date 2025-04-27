@@ -1,1 +1,83 @@
-.root {}
+@use '../../../assets/scss/color' as *;
+
+.root {
+	display: grid;
+	grid-template-columns: 30% 70%;
+	height: 100%;
+}
+
+.recipe__list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	border: 1px solid #d0d0d0;
+	padding: 4px;
+}
+
+$border-radius: 4px;
+
+.list__item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: #fff;
+	border-radius: $border-radius;
+}
+
+.list__img {
+	width: 40px;
+	border-radius: $border-radius 0 0 $border-radius;
+}
+
+.recipe__window {
+	padding: 0 .5rem;
+	display: grid;
+	grid-template-rows: 1fr 24px min-content;
+	gap: 8px;
+}
+
+.recipe__info {
+	display: grid;
+	grid-template-areas: "name" "icon" "inputs";
+	place-items: center;
+	place-content: center;
+}
+
+.recipe__name {
+	grid-area: name;
+}
+
+.recipe__icon {
+	grid-area: icon;
+	width: 120px;
+}
+
+.input__list {
+	margin-top: 3rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.input__box {
+	width: 60px;
+	height: 60px;
+	background: #fff;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 8px;
+}
+
+.input__quality {
+	font-size: 12px;
+}
+
+.input__icon {
+	width: 100%;
+}
+
+.craft__button {
+	width: 100%;
+}

@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import style from "./scss/Inventory.module.scss";
 import { DeleteItem } from "../../hook/useInventory";
-import { InventoryItem } from "../../services/GameInventoryService";
-function Item(props: ItemProps) {
+import { Item } from "../../services/GameInventoryService";
+import Count from "../Count";
+function ItemSlot(props: ItemProps) {
     const { item } = props;
     const { checked, setChecked } = props;
 
@@ -38,17 +39,17 @@ function Item(props: ItemProps) {
                 </button>
             </div>
             <div className={style.name}>{item.name}</div>
-            <div className={style.count}>{item.n}</div>
+            <Count className={style.count}>{item.n}</Count>
             <img className={style.icon} src={item.icon} alt="" />
         </div>
     );
 }
 
-export default Item;
+export default ItemSlot;
 
 export interface ItemProps {
     id: string;
-    item: InventoryItem | null;
+    item: Item | null;
     checked: string;
     setChecked: React.Dispatch<React.SetStateAction<string>>;
     deleteFn: DeleteItem;

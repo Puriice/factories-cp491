@@ -1,4 +1,4 @@
-import Item from "./Item";
+import Item from "./ItemSlot";
 import style from "./scss/Inventory.module.scss";
 import gameConfig from "../../../config/game.json";
 import useInventory from "../../hook/useInventory";

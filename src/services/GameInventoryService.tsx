@@ -11,7 +11,7 @@ export default class GameInventoryService {
 
     private loadingInventoryStatus!: Promise<boolean>;
 
-    private items: InventoryItem[] = [];
+    private items: Item[] = [];
 
     constructor() {
         if (GameInventoryService.instance) return GameInventoryService.instance;
@@ -26,11 +26,7 @@ export default class GameInventoryService {
     private async loadInventory() {
         const outFields = ["OBJECTID", "name", "n", "icon"];
 
-        this.items = await query<InventoryItem>(
-            this.userId,
-            inventoryLayer,
-            outFields
-        );
+        this.items = await query<Item>(this.userId, inventoryLayer, outFields);
 
         return true;
     }
@@ -75,7 +71,7 @@ export default class GameInventoryService {
         crypto.getRandomValues(tempOBJECTIDArr);
 
         const tempOBJECTID = Number(tempOBJECTIDArr);
-        const payload: Omit<InventoryItem, "OBJECTID"> = {
+        const payload: Omit<Item, "OBJECTID"> = {
             name,
             n,
             icon: ItemImages[name] ?? MissingTexture,
@@ -118,7 +114,7 @@ export default class GameInventoryService {
     }
 }
 
-export interface InventoryItem {
+export interface Item {
     OBJECTID: number;
     name: string;
     n: number;

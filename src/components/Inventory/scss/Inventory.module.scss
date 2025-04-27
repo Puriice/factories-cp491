@@ -201,25 +201,7 @@ $name-bg: rgba(200, 200, 200, .5);
 }
 
 .count {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	z-index: 2;
-
 	font-size: 12px;
-	font-weight: bold;
-
-	border-radius: 4px;
-	background: $purple;
-	color: #fff;
-	padding: 2px;
-
-	width: 1.5rem;
-	aspect-ratio: 1 / 1;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
 }
 
 .icon {

@@ -7,6 +7,7 @@ import Button from "./Button";
 import useWorkerAssignment from "../hook/useWorkerAssignment";
 import useWorker from "../hook/useWorker";
 import useInventory from "../hook/useInventory";
+import Count from "./Count";
 
 function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
     const { appendItem } = useInventory();
@@ -31,10 +32,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
         const elapsedMinutes = elapsedMilliseconds / 60000;
         const resourcesGenerated = elapsedMinutes * resourcePerMinute;
 
-        return Math.min(
-            Math.floor(resourcesGenerated),
-            gameConfig.maximumNodeProduces
-        );
+        return Math.min(Math.floor(resourcesGenerated), gameConfig.maxStack);
     }
 
     const [nResource, setNResource] = useState(0);
@@ -61,11 +59,7 @@ function ResourceInfo(props: PropsWithChildren<ResourceInfoProps>) {
             <div className={style.center}>
                 <h1 className={style.title}>{info.name}</h1>
                 <div className={style.name__box}>
-                    {nResource > 0 ? (
-                        <div className={style.count}>{nResource}</div>
-                    ) : (
-                        <></>
-                    )}
+                    {nResource > 0 ? <Count>{nResource}</Count> : <></>}
 
                     <img
                         className={style.icon}

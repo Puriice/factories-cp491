@@ -1,0 +1,15 @@
+@use '../../../assets/scss/color' as *;
+
+.root {
+	width: 100%;
+	border-radius: 4px;
+	overflow: hidden;
+	background: #d0d0d0;
+}
+
+.bar {
+	width: var(--percent);
+	height: 100%;
+	background: $purple;
+	// border-radius: 12px;
+}

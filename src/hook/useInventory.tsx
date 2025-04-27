@@ -1,8 +1,6 @@
 import { useState } from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import GameInventoryService, {
-    InventoryItem,
-} from "../services/GameInventoryService";
+import GameInventoryService, { Item } from "../services/GameInventoryService";
 import ItemImages from "../assets/ItemImages";
 import MissingTexture from "../assets/img/missingTexture.png";
 import gameConfig from "../../config/game.json";
@@ -26,7 +24,7 @@ export async function query<R>(
     return features.map(({ attributes }) => attributes);
 }
 
-export type InventoryList = InventoryItem[];
+export type InventoryList = Item[];
 export type DeleteItem = (objectId: number) => Promise<boolean>;
 export type AppendItem = (name: string, n: number) => Promise<boolean>;
 
@@ -39,7 +37,7 @@ export type useInventoryReturns = {
 export default function useIntentory(): useInventoryReturns {
     const inventoryService = new GameInventoryService();
 
-    const [inventory, setInventory] = useState<InventoryItem[]>(
+    const [inventory, setInventory] = useState<Item[]>(
         inventoryService.getItems()
     );
 
