@@ -47,8 +47,16 @@ $border-radius: 4px;
 	grid-area: name;
 }
 
-.recipe__icon {
+.icon__box {
 	grid-area: icon;
+	width: 120px;
+	height: 120px;
+	position: relative;
+	background: #fff;
+	border-radius: 4px;
+}
+
+.recipe__icon {
 	width: 120px;
 }
 
@@ -57,6 +65,7 @@ $border-radius: 4px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	gap: 4px;
 }
 
 .input__box {

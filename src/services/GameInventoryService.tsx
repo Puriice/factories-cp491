@@ -88,13 +88,6 @@ export default class GameInventoryService {
             modifiedItems.push(item);
 
             if (n <= diff) {
-                console.log({
-                    modify: item,
-                    before: item.n,
-                    after: item.n + n,
-                    n,
-                });
-
                 item.n += n;
                 n = 0;
             } else {
@@ -210,6 +203,91 @@ export default class GameInventoryService {
             result.addFeatureResults.forEach((result, index) => {
                 appeneded[index].OBJECTID = result.objectId!;
             });
+        }
+
+        return true;
+    }
+
+    public getOptimisticPopItem(items: Item[], name: string, n: number) {
+        const _items = [
+            ...items.map((item) => {
+                return { ...item };
+            }),
+        ];
+
+        const deletedItems: Item[] = [];
+        const modifiedItems: Item[] = [];
+
+        const relatedItems = _items.filter((item) => item.name == name);
+
+        relatedItems.forEach((item) => {
+            if (item.n <= n) {
+                deletedItems.push(item);
+
+                n -= item.n;
+                return;
+            }
+
+            modifiedItems.push(item);
+
+            item.n -= n;
+            n = 0;
+        });
+
+        return {
+            items: _items,
+            deletedItems,
+            modifiedItems,
+        };
+    }
+
+    public async popItem(name: string, n: number) {
+        const oldItems = [...this.items];
+
+        const { items, deletedItems, modifiedItems } =
+            this.getOptimisticPopItem(this.items, name, n);
+
+        this.items = items;
+
+        if (deletedItems.length > 0) {
+            const result = await inventoryLayer.applyEdits({
+                deleteFeatures: deletedItems.map((item) => {
+                    return new Graphic({
+                        attributes: {
+                            OBJECTID: item.OBJECTID,
+                        },
+                    });
+                }),
+            });
+
+            if (result.deleteFeatureResults.some((res) => res.error != null)) {
+                console.error(result.deleteFeatureResults);
+
+                this.items = oldItems;
+
+                return false;
+            }
+        }
+
+        if (modifiedItems.length > 0) {
+            const result = await inventoryLayer.applyEdits({
+                updateFeatures: modifiedItems.map((item) => {
+                    return new Graphic({
+                        attributes: {
+                            ...item,
+                            owner: this.userId,
+                        },
+                    });
+                }),
+            });
+
+            if (result.updateFeatureResults.some((res) => res.error != null)) {
+                console.error(result.updateFeatureResults);
+
+                this.items = oldItems;
+
+                return false;
+            }
         }
 
         return true;

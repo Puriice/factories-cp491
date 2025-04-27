@@ -2,6 +2,7 @@ import { useState } from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GameInventoryService, { Item } from "../services/GameInventoryService";
 import gameConfig from "../../config/game.json";
+import { Recipe } from "../services/GameRecipeService";
 
 export async function query<R>(
     userId: string,
@@ -25,11 +26,15 @@ export async function query<R>(
 export type InventoryList = Item[];
 export type DeleteItem = (objectId: number) => Promise<boolean>;
 export type AppendItem = (name: string, n: number) => Promise<boolean>;
+export type PopItem = (name: string, n: number) => Promise<boolean>;
+export type CraftItem = (recipe: Recipe) => Promise<boolean>;
 
 export type useInventoryReturns = {
     inventory: InventoryList;
     deleteItem: DeleteItem;
     appendItem: AppendItem;
+    popItem: PopItem;
+    craftItem: CraftItem;
 };
 
 export default function useIntentory(): useInventoryReturns {
@@ -73,5 +78,33 @@ export default function useIntentory(): useInventoryReturns {
         return result;
     }
 
-    return { inventory, deleteItem, appendItem };
+    async function popItem(name: string, n: number) {
+        setInventory((value) => {
+            const { items } = inventoryService.getOptimisticPopItem(
+                value,
+                name,
+                n
+            );
+
+            return [...items];
+        });
+
+        const result = await inventoryService.popItem(name, n);
+
+        setInventory(inventoryService.getItems());
+
+        return result;
+    }
+
+    async function craftItem(recipe: Recipe) {
+        recipe.inputs.forEach(async (input) => {
+            await popItem(input.name, input.n);
+        });
+
+        await appendItem(recipe.produce, recipe.n);
+
+        return true;
+    }
+
+    return { inventory, deleteItem, appendItem, popItem, craftItem };
 }

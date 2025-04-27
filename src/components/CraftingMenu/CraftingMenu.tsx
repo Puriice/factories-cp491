@@ -5,9 +5,10 @@ import ProgressBar from "../Progress/ProgressBar";
 import CraftingListItem from "./CraftingListItem";
 import style from "./scss/CraftingMenu.module.scss";
 import CraftingInputItem from "./CraftingInputItem";
-import useInventory from "../../hook/useInventory";
+import { CraftItem, InventoryList, PopItem } from "../../hook/useInventory";
+import Count from "../Count";
 
-function CraftingMenu() {
+function CraftingMenu(props: CraftingMenuProps) {
     const recipeService = new GameRecipeService();
     const recipes = recipeService.getRecipes();
 
@@ -15,7 +16,7 @@ function CraftingMenu() {
     const [clickedCount, setClickedCount] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
 
-    const { inventory } = useInventory();
+    const { inventory, craftItem } = props.inventory;
 
     const totalAvaliable = useMemo(() => {
         return inventory.reduce((prev, curr) => {
@@ -44,6 +45,13 @@ function CraftingMenu() {
         };
     }, [isMouseDown, selectedRecipe.clicks]);
 
+    useEffect(() => {
+        if (clickedCount != selectedRecipe.clicks) return;
+
+        craftItem(selectedRecipe);
+        setClickedCount(0);
+    }, [clickedCount, craftItem, selectedRecipe, selectedRecipe.clicks]);
+
     return (
         <div className={style.root}>
             <div className={style.recipe__list}>
@@ -66,11 +74,14 @@ function CraftingMenu() {
                     <h1 className={style.recipe__name}>
                         {selectedRecipe.produce}
                     </h1>
-                    <img
-                        src={selectedRecipe.icon}
-                        alt=""
-                        className={style.recipe__icon}
-                    />
+                    <div className={style.icon__box}>
+                        <Count>{selectedRecipe.n}</Count>
+                        <img
+                            src={selectedRecipe.icon}
+                            alt=""
+                            className={style.recipe__icon}
+                        />
+                    </div>
                     <div className={style.input__list}>
                         {selectedRecipe.inputs.map((input) => {
                             return (
@@ -99,3 +110,11 @@ function CraftingMenu() {
 }
 
 export default CraftingMenu;
+
+export interface CraftingMenuProps {
+    inventory: {
+        inventory: InventoryList;
+        popItem: PopItem;
+        craftItem: CraftItem;
+    };
+}

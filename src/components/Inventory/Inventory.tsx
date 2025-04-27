@@ -1,16 +1,16 @@
 import Item from "./ItemSlot";
 import style from "./scss/Inventory.module.scss";
 import gameConfig from "../../../config/game.json";
-import useInventory from "../../hook/useInventory";
+import { DeleteItem, InventoryList } from "../../hook/useInventory";
 import people from "../../assets/img/people.png";
 import { useEffect, useMemo, useState } from "react";
 import useWorker from "../../hook/useWorker";
 import useWorkerAssignment from "../../hook/useWorkerAssignment";
 
-function Inventory() {
+function Inventory(props: InventoryProps) {
     const { worker } = useWorker();
     const { occupiedWorker } = useWorkerAssignment();
-    const { inventory, deleteItem } = useInventory();
+    const { inventory, deleteItem } = props.inventory;
 
     const [checked, setChecked] = useState("");
 
@@ -124,3 +124,10 @@ function Inventory() {
 }
 
 export default Inventory;
+
+export interface InventoryProps {
+    inventory: {
+        inventory: InventoryList;
+        deleteItem: DeleteItem;
+    };
+}
